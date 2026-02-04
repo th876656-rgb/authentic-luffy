@@ -1,0 +1,290 @@
+.policy-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    padding: calc(var(--header-height) + 40px) 20px 60px;
+    color: white;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.btn-edit-policy,
+.edit-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.btn-edit-policy {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit-policy:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}
+
+.edit-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-save-policy,
+.btn-cancel-policy {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-save-policy {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-save-policy:hover {
+    background: #15803d;
+}
+
+.btn-cancel-policy {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-cancel-policy:hover {
+    background: #b91c1c;
+}
+
+.edit-heading {
+    width: 100%;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    color: #3b82f6;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.edit-heading:focus {
+    outline: none;
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.edit-item-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.edit-content-item {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 1rem;
+}
+
+.edit-content-item:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-delete-item {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.btn-delete-item:hover {
+    background: #b91c1c;
+}
+
+.btn-add-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 12px;
+}
+
+.btn-add-item:hover {
+    background: #15803d;
+}
+
+.policy-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+}
+
+.back-link {
+    color: #3b82f6;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.policy-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.policy-section {
+    margin-bottom: 40px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.policy-section h2 {
+    color: #3b82f6;
+    font-size: 1.5rem;
+    margin: 0 0 16px 0;
+}
+
+.policy-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.policy-section li {
+    padding: 12px 0;
+    padding-left: 28px;
+    position: relative;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.policy-section li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.policy-contact {
+    max-width: 800px;
+    margin: 48px auto 0;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.policy-contact h3 {
+    font-size: 1.5rem;
+    margin: 0 0 12px 0;
+}
+
+.policy-contact p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 20px 0;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 1.1rem;
+}
+
+.contact-info a {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.contact-info a:hover {
+    color: #2563eb;
+}
+
+.not-found {
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.not-found h2 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+}
+
+.not-found a {
+    display: inline-block;
+    padding: 12px 32px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.not-found a:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .policy-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .policy-section {
+        padding: 16px;
+    }
+
+    .policy-section h2 {
+        font-size: 1.2rem;
+    }
+
+    .contact-info {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Database - Authentic Luffy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border-left: 4px solid #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            margin-top: 15px;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .steps {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Reset Database</h1>
+        <p class="subtitle">Khôi phục database về trạng thái ban đầu</p>
+
+        <div id="status" class="status info">
+            ⏳ Sẵn sàng reset database...
+        </div>
+
+        <button id="resetBtn" class="btn btn-primary" onclick="resetDatabase()">
+            🚀 BẮT ĐẦU RESET
+        </button>
+
+        <button id="goHomeBtn" class="btn btn-success" style="display: none;" onclick="goHome()">
+            🏠 VỀ TRANG CHỦ
+        </button>
+
+        <div class="steps">
+            <h3 style="margin-bottom: 20px; color: #333;">Các bước sẽ thực hiện:</h3>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Xóa database cũ</div>
+                    <div class="step-desc">Xóa hoàn toàn database bị lỗi</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Tạo database mới</div>
+                    <div class="step-desc">Khởi tạo database với cấu trúc đúng</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Thêm dữ liệu mẫu</div>
+                    <div class="step-desc">Thêm danh mục và sản phẩm mẫu</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Hoàn tất</div>
+                    <div class="step-desc">Chuyển về trang chủ để kiểm tra</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function resetDatabase() {
+            const statusDiv = document.getElementById('status');
+            const resetBtn = document.getElementById('resetBtn');
+            const goHomeBtn = document.getElementById('goHomeBtn');
+
+            resetBtn.disabled = true;
+            resetBtn.innerHTML = '⏳ Đang xử lý...<span class="loading"></span>';
+
+            try {
+                // Step 1: Delete old database
+                statusDiv.className = 'status info';
+                statusDiv.textContent = '🗑️ Bước 1/4: Đang xóa database cũ...';
+                
+                await new Promise((resolve, reject) => {
+                    const deleteRequest = indexedDB.deleteDatabase('AuthenticLuffyDB');
+                    deleteRequest.onsuccess = () => resolve();
+                    deleteRequest.onerror = () => reject(deleteRequest.error);
+                    deleteRequest.onblocked = () => {
+                        alert('Vui lòng đóng tất cả các tab khác của website này!');
+                        reject(new Error('Database blocked'));
+                    };
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Step 2: Create new database
+                statusDiv.textContent = '🔨 Bước 2/4: Đang tạo database mới...';
+                
+                const db = await new Promise((resolve, reject) => {
+                    const request = indexedDB.open('AuthenticLuffyDB', 1);
+                    
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        // Create stores
+                        if (!db.objectStoreNames.contains('products')) {
+                            const productStore = db.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
+                            productStore.createIndex('sku', 'sku', { unique: true });
+                            productStore.createIndex('name', 'name', { unique: false });
+                            productStore.createIndex('category', 'category', { unique: false });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('categories')) {
+                            db.createObjectStore('categories', { keyPath: 'id' });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('settings')) {
+                            db.createObjectStore('settings', { keyPath: 'key' });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('hero')) {
+                            db.createObjectStore('hero', { keyPath: 'id' });
+                        }
+                    };
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Step 3: Add sample data
+                statusDiv.textContent = '📦 Bước 3/4: Đang thêm dữ liệu mẫu...';
+                
+                // Add categories
+                const categoryTx = db.transaction('categories', 'readwrite');
+                const categoryStore = categoryTx.objectStore('categories');
+                
+                categoryStore.add({ id: 'daily', title: 'GIÀY ĐI HÀNG NGÀY', subtitle: 'Phong cách tối giản / Tiện Lợi', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80' });
+                categoryStore.add({ id: 'sports', title: 'GIÀY CHƠI THỂ THAO', subtitle: 'Hiệu suất cao / Bền bỉ', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80' });
+                categoryStore.add({ id: 'new', title: 'HÀNG MỚI VỀ', subtitle: 'Bộ sưu tập Xuân/Hè 2026', image: 'https://images.unsplash.com/photo-1556906781-9a412961d28c?auto=format&fit=crop&q=80' });
+                
+                await new Promise((resolve, reject) => {
+                    categoryTx.oncomplete = () => resolve();
+                    categoryTx.onerror = () => reject(categoryTx.error);
+                });
+
+                // Add sample products
+                const productTx = db.transaction('products', 'readwrite');
+                const productStore = productTx.objectStore('products');
+                
+                productStore.add({
+                    sku: 'NK-AJ1-001',
+                    name: 'Nike Air Jordan 1 Retro High OG Chicago',
+                    category: 'daily',
+                    price: 3500000,
+                    salePrice: 3200000,
+                    quantity: 5,
+                    sizes: [38, 39, 40, 41, 42, 43],
+                    images: Array(6).fill('https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=800'),
+                    description: 'Giày Nike Air Jordan 1 Retro High OG phối màu Chicago cổ điển, 100% authentic.'
+                });
+                
+                productStore.add({
+                    sku: 'NK-AJ1-002',
+                    name: 'Nike Air Jordan 1 Retro High OG Bred',
+                    category: 'daily',
+                    price: 3600000,
+                    salePrice: null,
+                    quantity: 3,
+                    sizes: [39, 40, 41, 42],
+                    images: Array(6).fill('https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=800'),
+                    description: 'Giày Nike Air Jordan 1 Retro High OG phối màu Bred, hàng chính hãng.'
+                });
+                
+                productStore.add({
+                    sku: 'NK-ZM-001',
+                    name: 'Nike Zoom Freak 3',
+                    category: 'sports',
+                    price: 2800000,
+                    salePrice: 2500000,
+                    quantity: 0,
+                    sizes: [40, 41, 42, 43, 44],
+                    images: Array(6).fill('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800'),
+                    description: 'Giày Nike Zoom Freak 3 chuyên dụng bóng rổ, đã hết hàng.'
+                });
+                
+                await new Promise((resolve, reject) => {
+                    productTx.oncomplete = () => resolve();
+                    productTx.onerror = () => reject(productTx.error);
+                });
+
+                db.close();
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Step 4: Complete
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Bước 4/4: Hoàn tất! Database đã được reset thành công!';
+                
+                resetBtn.style.display = 'none';
+                goHomeBtn.style.display = 'block';
+
+            } catch (error) {
+                console.error('Reset failed:', error);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Lỗi: ' + error.message;
+                resetBtn.disabled = false;
+                resetBtn.textContent = '🔄 THỬ LẠI';
+            }
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

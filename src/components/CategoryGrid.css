@@ -1,0 +1,220 @@
+.category-section {
+    padding: var(--spacing-2xl) 0;
+    background-color: var(--color-primary);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xl);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background-color: var(--color-accent);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+}
+
+.category-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    aspect-ratio: 4/5;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-card:hover {
+    transform: translateY(-8px);
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.category-card:hover .card-image img {
+    transform: scale(1.1);
+}
+
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-lg);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.category-card.edit-mode {
+    cursor: default;
+}
+
+.btn-edit-category {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.btn-edit-category:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+}
+
+.image-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.image-upload-overlay:hover {
+    background: rgba(37, 99, 235, 0.8);
+}
+
+.edit-input {
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
+    font-size: 1rem;
+}
+
+.edit-input.title-input {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.edit-input.subtitle-input {
+    font-size: 0.9rem;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.btn-save,
+.btn-cancel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-save {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #15803d;
+}
+
+.btn-cancel {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #b91c1c;
+}
+
+.card-overlay h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.card-overlay p {
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.btn-link {
+    background: none;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0;
+    border-bottom: 1px solid transparent;
+    transition: border 0.3s;
+}
+
+.category-card:hover .btn-link {
+    border-bottom-color: white;
+}
+
+@media (max-width: 768px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .category-card {
+        height: 300px;
+    }
+}

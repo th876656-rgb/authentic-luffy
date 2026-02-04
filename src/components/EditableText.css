@@ -1,0 +1,100 @@
+.editable-text {
+    position: relative;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-block;
+    min-width: 20px;
+}
+
+.editable-text:hover {
+    background: rgba(59, 130, 246, 0.1);
+    outline: 1px dashed #3b82f6;
+}
+
+.editable-text .edit-icon {
+    opacity: 0;
+    margin-left: 6px;
+    color: #3b82f6;
+    transition: opacity 0.2s ease;
+    vertical-align: middle;
+}
+
+.editable-text:hover .edit-icon {
+    opacity: 1;
+}
+
+.editable-text-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.editable-text-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px solid #3b82f6;
+    border-radius: 6px;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.editable-text-input:focus {
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.editable-text-input.multiline {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.editable-text-actions {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    display: flex;
+    gap: 6px;
+    z-index: 100;
+}
+
+.btn-save-text,
+.btn-cancel-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-save-text {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-save-text:hover {
+    background: #15803d;
+    transform: scale(1.05);
+}
+
+.btn-cancel-text {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-cancel-text:hover {
+    background: #b91c1c;
+    transform: scale(1.05);
+}

@@ -1,0 +1,39 @@
+.brand-section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--color-primary);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand-grid {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-xl);
+}
+
+.brand-item {
+    opacity: 0.5;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    filter: grayscale(100%);
+}
+
+.brand-item:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.1);
+}
+
+.brand-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.hidden-title {
+    display: none;
+}

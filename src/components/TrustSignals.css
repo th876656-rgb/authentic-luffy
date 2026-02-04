@@ -1,0 +1,52 @@
+.trust-signals {
+    background-color: var(--color-primary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-lg) 0;
+}
+
+.trust-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-2xl);
+}
+
+.signal-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.signal-icon {
+    color: var(--color-accent);
+}
+
+.signal-text h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 2px;
+}
+
+.signal-text p {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.divider {
+    width: 1px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .trust-container {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+
+    .divider {
+        display: none;
+    }
+}
