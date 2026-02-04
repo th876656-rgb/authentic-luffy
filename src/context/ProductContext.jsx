@@ -46,21 +46,36 @@ export const ProductProvider = ({ children }) => {
     const loadData = async () => {
         try {
             console.log('Loading data from Supabase...');
-            const [loadedProducts, loadedCategories, heroData] = await Promise.all([
-                db.getAll('products'),
-                db.getAll('categories'),
-                db.getHero() // Use getHero() method for Supabase
-            ]);
 
-            console.log('Loaded products:', loadedProducts);
-            console.log('Loaded categories:', loadedCategories);
-            console.log('Loaded hero:', heroData);
+            // Load data with individual error handling
+            const loadedProducts = await db.getAll('products').catch(err => {
+                console.warn('Products table empty or error:', err.message);
+                return [];
+            });
+
+            const loadedCategories = await db.getAll('categories').catch(err => {
+                console.warn('Categories table empty or error:', err.message);
+                return [];
+            });
+
+            const heroData = await db.getHero().catch(err => {
+                console.warn('Hero data not found:', err.message);
+                return null;
+            });
+
+            console.log('Loaded products:', loadedProducts?.length || 0, 'items');
+            console.log('Loaded categories:', loadedCategories?.length || 0, 'items');
+            console.log('Loaded hero:', heroData ? 'Yes' : 'No');
 
             setProducts(loadedProducts || []);
             setCategories(loadedCategories || []);
             setHeroContent(heroData);
         } catch (error) {
             console.error('Failed to load data:', error);
+            // Set empty defaults to prevent crashes
+            setProducts([]);
+            setCategories([]);
+            setHeroContent(null);
         }
     };
 

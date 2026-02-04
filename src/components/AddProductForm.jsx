@@ -110,12 +110,22 @@ const AddProductForm = ({ categoryId, onClose }) => {
             console.error('Failed to add product:', error);
             console.error('Error details:', error.message, error.stack);
 
-            // Better error messages
+            // Better, more specific error messages
+            let errorMessage = 'Không thể thêm sản phẩm!';
+
             if (error.message && error.message.includes('uniqueness')) {
-                alert(`SKU "${formData.sku}" đã tồn tại! Vui lòng sử dụng SKU khác.`);
-            } else {
-                alert(`Không thể thêm sản phẩm! Lỗi: ${error.message || 'Unknown error'}`);
+                errorMessage = `SKU "${formData.sku}" đã tồn tại! Vui lòng sử dụng SKU khác.`;
+            } else if (error.message && error.message.includes('network')) {
+                errorMessage = 'Lỗi kết nối mạng! Vui lòng kiểm tra internet và thử lại.';
+            } else if (error.message && error.message.includes('permission')) {
+                errorMessage = 'Không có quyền thêm sản phẩm! Vui lòng đăng nhập admin.';
+            } else if (error.code === 'PGRST116') {
+                errorMessage = 'Không tìm thấy bảng dữ liệu! Vui lòng liên hệ quản trị viên.';
+            } else if (error.message) {
+                errorMessage = `Lỗi: ${error.message}`;
             }
+
+            alert(errorMessage + '\n\nMẹo: Kiểm tra lại thông tin và thử lại.');
         } finally {
             setUploading(false);
         }
