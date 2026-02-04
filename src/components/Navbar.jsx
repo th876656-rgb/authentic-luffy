@@ -173,7 +173,7 @@ const Navbar = () => {
                                             <div className="suggestion-name">{product.name}</div>
                                             <div className="suggestion-sku">SKU: {product.sku}</div>
                                             <div className="suggestion-price">
-                                                {formatPrice(product.salePrice || product.price)}
+                                                {formatPrice(product.sale_price || product.price)}
                                             </div>
                                         </div>
                                     </div>

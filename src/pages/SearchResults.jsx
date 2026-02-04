@@ -55,7 +55,7 @@ const SearchResults = () => {
                                 className={`result-card ${product.quantity === 0 ? 'sold-out' : ''}`}
                                 onClick={() => handleProductClick(product.id)}
                             >
-                                {product.salePrice && <span className="sale-badge">SALE</span>}
+                                {product.sale_price && <span className="sale-badge">SALE</span>}
                                 {product.quantity === 0 && (
                                     <div className="sold-overlay">
                                         <div className="sold-stamp">SOLD OUT</div>
@@ -70,10 +70,10 @@ const SearchResults = () => {
                                     <div className="result-sku">SKU: {product.sku}</div>
                                     <h3 className="result-name">{product.name}</h3>
                                     <div className="result-price">
-                                        {product.salePrice ? (
+                                        {product.sale_price ? (
                                             <>
                                                 <span className="price-original">{formatPrice(product.price)}</span>
-                                                <span className="price-sale">{formatPrice(product.salePrice)}</span>
+                                                <span className="price-sale">{formatPrice(product.sale_price)}</span>
                                             </>
                                         ) : (
                                             <span className="price-regular">{formatPrice(product.price)}</span>

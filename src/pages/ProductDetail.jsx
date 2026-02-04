@@ -51,9 +51,9 @@ const ProductDetail = () => {
     };
 
     const handleSaveSalePrice = async (newValue) => {
-        const salePrice = parseFloat(newValue.replace(/[^\d]/g, ''));
-        if (!isNaN(salePrice)) {
-            await updateProduct({ ...product, salePrice });
+        const sale_price = parseFloat(newValue.replace(/[^\d]/g, ''));
+        if (!isNaN(sale_price)) {
+            await updateProduct({ ...product, sale_price });
         }
     };
 
@@ -145,7 +145,7 @@ const ProductDetail = () => {
                         </div>
 
                         <div className="product-pricing">
-                            {product.salePrice ? (
+                            {product.sale_price ? (
                                 <>
                                     <EditableText
                                         value={formatPrice(product.price)}
@@ -154,13 +154,13 @@ const ProductDetail = () => {
                                         className="price-original"
                                     />
                                     <EditableText
-                                        value={formatPrice(product.salePrice)}
+                                        value={formatPrice(product.sale_price)}
                                         onSave={handleSaveSalePrice}
                                         tag="span"
                                         className="price-sale"
                                     />
                                     <span className="discount-badge">
-                                        -{Math.round(((product.price - product.salePrice) / product.price) * 100)}%
+                                        -{Math.round(((product.price - product.sale_price) / product.price) * 100)}%
                                     </span>
                                 </>
                             ) : (

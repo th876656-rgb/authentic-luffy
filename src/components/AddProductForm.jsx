@@ -94,7 +94,7 @@ const AddProductForm = ({ categoryId, onClose }) => {
                 sku: formData.sku.trim(), // Trim whitespace
                 name: formData.name,
                 price: parseFloat(formData.price),
-                salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
+                sale_price: formData.salePrice ? parseFloat(formData.salePrice) : null,
                 description: formData.description,
                 sizeInventory: formData.sizeInventory,
                 quantity: totalQuantity, // Auto-calculated from size inventory

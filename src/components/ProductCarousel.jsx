@@ -48,7 +48,7 @@ const ProductCarousel = () => {
                             onClick={() => handleProductClick(product.id)}
                         >
                             <div className="product-image-wrapper">
-                                {product.salePrice && <span className="sale-badge">SALE</span>}
+                                {product.sale_price && <span className="sale-badge">SALE</span>}
                                 {product.quantity === 0 && (
                                     <div className="sold-overlay-mini">
                                         <span>SOLD</span>
@@ -59,10 +59,10 @@ const ProductCarousel = () => {
                             <div className="product-info">
                                 <h3 className="product-name">{product.name}</h3>
                                 <div className="product-price">
-                                    {product.salePrice ? (
+                                    {product.sale_price ? (
                                         <>
                                             <span className="price-original">{formatPrice(product.price)}</span>
-                                            <span className="price-sale">{formatPrice(product.salePrice)}</span>
+                                            <span className="price-sale">{formatPrice(product.sale_price)}</span>
                                         </>
                                     ) : (
                                         <span className="price-regular">{formatPrice(product.price)}</span>
