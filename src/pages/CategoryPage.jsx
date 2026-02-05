@@ -9,8 +9,9 @@ const CategoryPage = () => {
     const { categoryId: paramCategoryId } = useParams();
     const location = useLocation();
 
-    // Determine category ID: use 'new' for /new-arrivals route, otherwise use param
-    const categoryId = location.pathname === '/new-arrivals' ? 'new' : paramCategoryId;
+    // Determine category ID: handle /new-arrivals with or without trailing slash
+    const isNewArrivals = location.pathname.includes('/new-arrivals');
+    const categoryId = isNewArrivals ? 'new' : paramCategoryId;
 
     const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct } = useProducts();
     const navigate = useNavigate();
