@@ -10,7 +10,16 @@ const SizeInventoryEditor = ({ product, onClose }) => {
         '40', '40.5', '41', '41.5', '42', '42.5', '43', '43.5', '44', '44.5', '45', '45.5'
     ];
 
-    const [inventory, setInventory] = useState(product.sizeInventory || {});
+    // Initialize inventory: check sizes (JSONB) or fallback to empty
+    // If sizes is an array (legacy), ignore it for editing inventory (start fresh or migrate logic needed?)
+    // If sizes is an object, use it.
+    const getInitialInventory = () => {
+        if (product.sizeInventory) return product.sizeInventory; // Fallback for in-memory legacy
+        if (product.sizes && !Array.isArray(product.sizes)) return product.sizes; // Valid inventory object
+        return {}; // Default empty if sizes is array (legacy data) or null
+    };
+
+    const [inventory, setInventory] = useState(getInitialInventory());
     const [saving, setSaving] = useState(false);
 
     const updateQuantity = (size, change) => {
@@ -47,10 +56,10 @@ const SizeInventoryEditor = ({ product, onClose }) => {
             // Calculate total quantity
             const totalQuantity = Object.values(inventory).reduce((sum, qty) => sum + qty, 0);
 
-            // Update product
+            // Update product - Map inventory to 'sizes' column
             await updateProduct({
                 ...product,
-                sizeInventory: inventory,
+                sizes: inventory,
                 quantity: totalQuantity
             });
 

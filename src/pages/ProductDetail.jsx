@@ -197,24 +197,29 @@ const ProductDetail = () => {
                                 )}
                             </div>
                             <div className="size-options">
-                                {product.sizeInventory ? (
-                                    // New format: sizeInventory object
-                                    Object.entries(product.sizeInventory).map(([size, qty]) => (
-                                        <div
-                                            key={size}
-                                            className={`size-option ${qty === 0 ? 'sold-out' : ''} ${qty > 0 && qty <= 2 ? 'low-stock' : ''}`}
-                                        >
-                                            {size}
-                                            {qty > 0 && qty <= 2 && <span className="stock-badge">Sắp hết</span>}
-                                            {qty === 0 && <span className="stock-badge out">Hết</span>}
-                                        </div>
-                                    ))
-                                ) : (
-                                    // Old format: sizes array (fallback)
-                                    product.sizes?.map((size) => (
-                                        <div key={size} className="size-option">{size}</div>
-                                    ))
-                                )}
+                                {(() => {
+                                    // Determine if we have inventory object or legacy array
+                                    const inventory = (product.sizes && !Array.isArray(product.sizes)) ? product.sizes : product.sizeInventory;
+                                    const legacySizes = Array.isArray(product.sizes) ? product.sizes : null;
+
+                                    if (inventory) {
+                                        return Object.entries(inventory).map(([size, qty]) => (
+                                            <div
+                                                key={size}
+                                                className={`size-option ${qty === 0 ? 'sold-out' : ''} ${qty > 0 && qty <= 2 ? 'low-stock' : ''}`}
+                                            >
+                                                {size}
+                                                {qty > 0 && qty <= 2 && <span className="stock-badge">Sắp hết</span>}
+                                                {qty === 0 && <span className="stock-badge out">Hết</span>}
+                                            </div>
+                                        ));
+                                    } else if (legacySizes) {
+                                        return legacySizes.map((size) => (
+                                            <div key={size} className="size-option">{size}</div>
+                                        ));
+                                    }
+                                    return null;
+                                })()}
                             </div>
                         </div>
 

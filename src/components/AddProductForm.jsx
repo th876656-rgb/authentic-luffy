@@ -96,7 +96,7 @@ const AddProductForm = ({ categoryId, onClose }) => {
                 price: parseFloat(formData.price),
                 sale_price: formData.salePrice ? parseFloat(formData.salePrice) : null,
                 description: formData.description,
-                sizeInventory: formData.sizeInventory,
+                sizes: formData.sizeInventory, // Map sizeInventory to sizes (JSONB column)
                 quantity: totalQuantity, // Auto-calculated from size inventory
                 category: formData.category,
                 images: formData.images.filter(img => img !== '') // Remove empty images
