@@ -21,7 +21,7 @@ const Navbar = () => {
                 // For now, use a default logo or load from Supabase settings table
                 // You can implement Supabase Storage upload later
                 // Prioritize static logo for consistency across all users
-                const staticLogo = '/images/logo.svg';
+                const staticLogo = '/images/logo.jpg';
                 setLogoUrl(staticLogo);
 
                 // Optional: Check if user has a custom override (local only)
