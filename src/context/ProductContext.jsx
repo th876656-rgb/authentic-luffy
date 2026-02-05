@@ -82,9 +82,9 @@ export const ProductProvider = ({ children }) => {
     // Product operations
     const addProduct = async (productData) => {
         try {
-            const id = await db.add('products', productData);
+            const result = await db.add('products', productData);
             await loadData();
-            return id;
+            return result?.id;
         } catch (error) {
             console.error('Failed to add product:', error);
             throw error;
@@ -112,7 +112,7 @@ export const ProductProvider = ({ children }) => {
     };
 
     const getProductById = (id) => {
-        return products.find(p => p.id === parseInt(id));
+        return products.find(p => p.id === id || p.id === parseInt(id)); // Handle both string UUID and potential legacy number IDs
     };
 
     const getProductsBySKU = (sku) => {

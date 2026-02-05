@@ -82,15 +82,8 @@ const AddProductForm = ({ categoryId, onClose }) => {
         try {
             setUploading(true);
 
-            // Generate unique ID
-            const id = Date.now();
-
-            // Calculate total quantity from size inventory
-            const totalQuantity = Object.values(formData.sizeInventory).reduce((sum, qty) => sum + qty, 0);
-
-            // Prepare product data
+            // Prepare product data - Let Supabase generate ID
             const productData = {
-                id,
                 sku: formData.sku.trim(), // Trim whitespace
                 name: formData.name,
                 price: parseFloat(formData.price),
