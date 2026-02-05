@@ -106,12 +106,34 @@ const AddProductForm = ({ categoryId, onClose }) => {
             console.error('Failed to add product:', error);
             console.error('Error details:', error.message, error.stack);
 
+            // Handle duplicate SKU specific error
+            if (error.message && (error.message.includes('products_sku_key') || error.message.includes('duplicate key'))) {
+                const newSku = `${formData.sku}-${Math.floor(Math.random() * 1000)}`;
+                if (window.confirm(`Mã SKU "${formData.sku}" đã tồn tại!
+                
+Bạn có muốn hệ thống tự động đổi thành "${newSku}" và tiếp tục thêm sản phẩm không?`)) {
+                    try {
+                        // Retry with new SKU
+                        const updatedProductData = {
+                            ...productData,
+                            sku: newSku
+                        };
+                        await addProduct(updatedProductData);
+                        alert(`Đã thêm sản phẩm thành công với SKU mới: ${newSku}`);
+                        onClose();
+                        return;
+                    } catch (retryError) {
+                        alert('Vẫn không thể thêm sản phẩm. Vui lòng thử lại sau.');
+                    }
+                }
+                setUploading(false);
+                return;
+            }
+
             // Better, more specific error messages
             let errorMessage = 'Không thể thêm sản phẩm!';
 
-            if (error.message && error.message.includes('uniqueness')) {
-                errorMessage = `SKU "${formData.sku}" đã tồn tại! Vui lòng sử dụng SKU khác.`;
-            } else if (error.message && error.message.includes('network')) {
+            if (error.message && error.message.includes('network')) {
                 errorMessage = 'Lỗi kết nối mạng! Vui lòng kiểm tra internet và thử lại.';
             } else if (error.message && error.message.includes('permission')) {
                 errorMessage = 'Không có quyền thêm sản phẩm! Vui lòng đăng nhập admin.';
