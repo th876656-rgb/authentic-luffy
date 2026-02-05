@@ -16,9 +16,46 @@ const CategoryPage = () => {
     const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct } = useProducts();
     const navigate = useNavigate();
     const [showAddModal, setShowAddModal] = useState(false);
+    const [selectedSizes, setSelectedSizes] = useState([]);
 
     const category = getCategoryById(categoryId) || { title: 'Hàng Mới Về', subtitle: 'Bộ sưu tập mới nhất' };
-    const products = getProductsByCategory(categoryId);
+    const allProducts = getProductsByCategory(categoryId);
+
+    // Available sizes for filter
+    const AVAILABLE_SIZES = [
+        '35', '35.5', '36', '36.5', '37', '37.5', '38', '38.5', '39', '39.5',
+        '40', '40.5', '41', '41.5', '42', '42.5', '43', '43.5', '44', '44.5', '45', '45.5'
+    ];
+
+    // Filter logic
+    const products = selectedSizes.length === 0
+        ? allProducts
+        : allProducts.filter(product => {
+            // Check for new inventory format (Object)
+            if (product.sizes && !Array.isArray(product.sizes) && typeof product.sizes === 'object') {
+                // Return true if ANY selected size has quantity > 0
+                return selectedSizes.some(size => product.sizes[size] > 0);
+            }
+            // Check for legacy inventory format (Array)
+            if (Array.isArray(product.sizes)) {
+                return selectedSizes.some(size => product.sizes.includes(size));
+            }
+            // Check for sizeInventory field (fallback)
+            if (product.sizeInventory && typeof product.sizeInventory === 'object') {
+                return selectedSizes.some(size => product.sizeInventory[size] > 0);
+            }
+            return false;
+        });
+
+    const toggleSize = (size) => {
+        setSelectedSizes(prev => {
+            if (prev.includes(size)) {
+                return prev.filter(s => s !== size);
+            } else {
+                return [...prev, size];
+            }
+        });
+    };
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -55,6 +92,22 @@ const CategoryPage = () => {
             </div>
 
             <div className="container">
+                {/* Size Filter Section */}
+                <div className="size-filter-section">
+                    <span className="filter-label">Lọc theo size:</span>
+                    <div className="size-buttons">
+                        {AVAILABLE_SIZES.map(size => (
+                            <button
+                                key={size}
+                                className={`size-btn ${selectedSizes.includes(size) ? 'active' : ''}`}
+                                onClick={() => toggleSize(size)}
+                            >
+                                {size}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="products-grid">
                     {products.map((product) => (
                         <div
