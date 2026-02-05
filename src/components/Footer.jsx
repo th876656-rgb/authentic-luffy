@@ -27,26 +27,12 @@ const Footer = () => {
             if (!db.db) {
                 await db.init();
             }
-            const saved = await db.get('settings', 'footer');
-            if (saved && saved.data) {
-                setFooterData(saved.data);
+            const savedData = await db.getSetting('footer');
+            if (savedData) {
+                setFooterData(savedData);
             }
         } catch (error) {
             console.error('Failed to load footer data:', error);
-            // Use default values if loading fails
-        }
-    };
-
-    const saveFooterData = async (newData) => {
-        try {
-            // Ensure database is initialized
-            if (!db.db) {
-                await db.init();
-            }
-            await db.update('settings', { key: 'footer', data: newData });
-            setFooterData(newData);
-        } catch (error) {
-            console.error('Failed to save footer data:', error);
         }
     };
 

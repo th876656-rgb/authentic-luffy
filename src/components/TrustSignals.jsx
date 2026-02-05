@@ -23,9 +23,9 @@ const TrustSignals = () => {
             if (!db.db) {
                 await db.init();
             }
-            const saved = await db.get('settings', 'trustSignals');
-            if (saved && saved.data) {
-                setTrustData(saved.data);
+            const savedData = await db.getSetting('trustSignals');
+            if (savedData) {
+                setTrustData(savedData);
             }
         } catch (error) {
             console.error('Failed to load trust signals:', error);
@@ -37,7 +37,7 @@ const TrustSignals = () => {
             if (!db.db) {
                 await db.init();
             }
-            await db.update('settings', { key: 'trustSignals', data: newData });
+            await db.updateSetting('trustSignals', newData);
             setTrustData(newData);
         } catch (error) {
             console.error('Failed to save trust signals:', error);
