@@ -131,3 +131,23 @@
 .add-to-cart-btn:hover {
     background-color: #ddd;
 }
+
+@media (max-width: 768px) {
+    .product-card {
+        min-width: 160px;
+        /* Show ~2 cards on mobile */
+    }
+
+    .product-image-wrapper {
+        height: 160px;
+    }
+
+    .product-name {
+        font-size: 0.8rem;
+    }
+
+    .price-sale,
+    .price-regular {
+        font-size: 0.9rem;
+    }
+}

@@ -385,8 +385,17 @@
         font-size: 1.8rem;
     }
 
-    .price-sale,
     .price-regular {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-detail-page {
+        padding-top: calc(var(--header-height) + 20px);
+    }
+
+    .product-title {
         font-size: 1.5rem;
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, User, Upload, Settings } from 'lucide-react';
+import { Search, User, Upload, Settings, Menu, X } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import './Navbar.css';
 
@@ -8,6 +8,7 @@ const Navbar = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [logoUrl, setLogoUrl] = useState(null);
     const [showLogoUpload, setShowLogoUpload] = useState(false);
     const { searchProducts, isAdmin, editMode } = useProducts();
@@ -99,6 +100,14 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="container navbar-content">
+                {/* Mobile Menu Toggle */}
+                <button
+                    className="mobile-menu-toggle desktop-hidden"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                >
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+
                 {/* Logo Section */}
                 <Link to="/" className="navbar-logo">
                     <div
@@ -137,7 +146,7 @@ const Navbar = () => {
                     <div className="brand-name">Authentic Luffy</div>
                 </Link>
 
-                {/* Primary Menu */}
+                {/* Primary Menu - Desktop */}
                 <div className="navbar-menu desktop-only">
                     <div className="menu-top">
                         <Link to="/new-arrivals" className="nav-link text-accent font-bold">Săn Sale Authentic</Link>
@@ -155,7 +164,7 @@ const Navbar = () => {
                         <form onSubmit={handleSearch}>
                             <input
                                 type="text"
-                                placeholder="Tìm mã, tên sản phẩm..."
+                                placeholder="Tìm kiếm..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onFocus={() => searchResults.length > 0 && setShowSuggestions(true)}
@@ -203,6 +212,23 @@ const Navbar = () => {
                             <User size={20} />
                         </Link>
                     )}
+                </div>
+            </div>
+
+            {/* Mobile Menu Dropdown */}
+            <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+                <Link to="/new-arrivals" className="mobile-nav-link text-accent" onClick={() => setIsMobileMenuOpen(false)}>
+                    Săn Sale Authentic
+                </Link>
+                <Link to="/category/daily" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                    Giày Đi Hàng Ngày
+                </Link>
+                <Link to="/category/sports" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                    Giày Chơi Thể Thao
+                </Link>
+                <div className="mobile-store-info">
+                    <div>Hotline: 0868.653.931</div>
+                    <div>ĐC: 125 Lâm Du, Long Biên</div>
                 </div>
             </div>
         </nav>
