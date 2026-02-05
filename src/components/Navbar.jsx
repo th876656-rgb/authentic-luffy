@@ -20,10 +20,13 @@ const Navbar = () => {
             try {
                 // For now, use a default logo or load from Supabase settings table
                 // You can implement Supabase Storage upload later
-                const storedLogo = localStorage.getItem('logoUrl');
-                if (storedLogo) {
-                    setLogoUrl(storedLogo);
-                }
+                // Prioritize static logo for consistency across all users
+                const staticLogo = '/images/logo.svg';
+                setLogoUrl(staticLogo);
+
+                // Optional: Check if user has a custom override (local only)
+                // const storedLogo = localStorage.getItem('logoUrl');
+                // if (storedLogo) setLogoUrl(storedLogo);
             } catch (error) {
                 console.error('Failed to load logo:', error);
             }
