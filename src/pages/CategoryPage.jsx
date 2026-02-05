@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import AddProductForm from '../components/AddProductForm';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
-    const { categoryId } = useParams();
+    const { categoryId: paramCategoryId } = useParams();
+    const location = useLocation();
+
+    // Determine category ID: use 'new' for /new-arrivals route, otherwise use param
+    const categoryId = location.pathname === '/new-arrivals' ? 'new' : paramCategoryId;
+
     const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct } = useProducts();
     const navigate = useNavigate();
     const [showAddModal, setShowAddModal] = useState(false);
