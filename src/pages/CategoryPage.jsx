@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
@@ -64,7 +65,7 @@ const CategoryPage = () => {
     };
 
     const handleProductClick = (productId) => {
-        navigate(`/product/${productId}`);
+        navigate(`/ product / ${productId} `);
     };
 
     const handleDeleteProduct = async (e, productId) => {
@@ -81,9 +82,9 @@ const CategoryPage = () => {
     const handleQuickCategoryUpdate = async (e, productId, newCategory) => {
         e.stopPropagation();
         try {
+            setActiveQuickEditId(null); // Close menu immediately
             await updateProduct({ id: productId, category: newCategory });
-            setActiveQuickEditId(null);
-            alert('Đã cập nhật danh mục thành công!');
+            // No alert needed, UI updates optimistically
         } catch (error) {
             alert('Lỗi cập nhật danh mục: ' + error.message);
         }

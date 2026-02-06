@@ -29,11 +29,10 @@ const ProductCarousel = () => {
     const handleQuickCategoryUpdate = async (e, productId, newCategory) => {
         e.stopPropagation();
         try {
+            setActiveQuickEditId(null); // Close menu immediately
             await updateProduct({ id: productId, category: newCategory });
-            setActiveQuickEditId(null);
-            alert('Đã cập nhật danh mục thành công!');
         } catch (error) {
-            alert('Lỗi cập nhật danh mục: ' + error.message);
+            console.error('Update failed:', error);
         }
     };
 

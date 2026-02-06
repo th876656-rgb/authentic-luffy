@@ -93,10 +93,23 @@ export const ProductProvider = ({ children }) => {
 
     const updateProduct = async (productData) => {
         try {
+            // Optimistic Update: Update local state immediately
+            setProducts(prevProducts =>
+                prevProducts.map(p => p.id === productData.id ? { ...p, ...productData } : p)
+            );
+
+            // Perform DB update in background
             await db.update('products', productData);
+
+            // Reload to ensure consistency (optional/debounced in real apps, but good here)
+            // await loadData(); // Let's keep this but it might be slight overkill. 
+            // Actually, for "instant" feel, we rely on the setProducts above. 
+            // The subsequent loadData will just confirm it.
             await loadData();
         } catch (error) {
             console.error('Failed to update product:', error);
+            // Revert state on error if needed, or just reload
+            await loadData();
             throw error;
         }
     };
