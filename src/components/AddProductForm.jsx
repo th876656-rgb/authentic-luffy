@@ -78,7 +78,15 @@ const AddProductForm = ({ categoryId, onClose }) => {
         if (!base64Image.startsWith('data:')) return base64Image;
 
         try {
-            const fileName = `${Date.now()}_${index}.jpg`;
+            // Determine extension from MIME type
+            const mime = base64Image.split(';')[0].split(':')[1];
+            let extension = 'jpg';
+            if (mime === 'image/png') extension = 'png';
+            if (mime === 'image/webp') extension = 'webp';
+            if (mime === 'image/gif') extension = 'gif';
+            if (mime === 'image/heic') extension = 'heic';
+
+            const fileName = `${Date.now()}_${index}.${extension}`;
             const file = base64ToFile(base64Image, fileName);
 
             const { data, error } = await supabase.storage
