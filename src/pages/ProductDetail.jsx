@@ -298,7 +298,7 @@ const ProductDetail = () => {
                         <div className="product-meta">
                             <div className="meta-item">
                                 <strong>Danh mục:</strong>{' '}
-                                <strong>Danh mục:</strong>{' '}
+
                                 {isAdmin && editMode ? (
                                     <select
                                         className="category-dropdown"
