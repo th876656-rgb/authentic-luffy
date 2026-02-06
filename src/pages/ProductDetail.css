@@ -399,3 +399,88 @@
         font-size: 1.5rem;
     }
 }
+
+/* Quick Edit Detail Styles */
+.main-image {
+    overflow: visible !important;
+    /* Allow menu to show */
+}
+
+.main-image img {
+    border-radius: 12px;
+    /* Restore radius since overflow is visible */
+}
+
+.quick-edit-wrapper-detail {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 20;
+}
+
+.btn-quick-edit-detail {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    color: #333;
+}
+
+.btn-quick-edit-detail:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.quick-edit-menu-detail {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border: 1px solid #eee;
+    width: 200px;
+    overflow: hidden;
+    animation: fadeIn 0.1s ease-out;
+    z-index: 30;
+}
+
+.quick-edit-menu-detail button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.quick-edit-menu-detail button:last-child {
+    border-bottom: none;
+}
+
+.quick-edit-menu-detail button:hover {
+    background: #f8f9fa;
+    color: #000;
+}
+
+.quick-edit-menu-detail button.active {
+    background: #e3f2fd;
+    color: #007bff;
+    font-weight: 600;
+}
