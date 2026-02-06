@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useProducts } from '../context/ProductContext';
 import { Upload, X } from 'lucide-react';
+import { supabase } from '../utils/supabase';
 import './AddProductForm.css';
 
 const AddProductForm = ({ categoryId, onClose }) => {
@@ -58,6 +59,50 @@ const AddProductForm = ({ categoryId, onClose }) => {
         setFormData({ ...formData, sizeInventory: newInventory });
     };
 
+    // Helper: Chuyển Base64 thành File object để upload
+    const base64ToFile = (base64String, filename) => {
+        const arr = base64String.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+    };
+
+    // Helper: Upload ảnh lên Supabase Storage
+    const uploadImageToSupabase = async (base64Image, index) => {
+        // Nếu là link ảnh có sẵn (không phải base64), giữ nguyên
+        if (!base64Image.startsWith('data:')) return base64Image;
+
+        try {
+            const fileName = `${Date.now()}_${index}.jpg`;
+            const file = base64ToFile(base64Image, fileName);
+
+            const { data, error } = await supabase.storage
+                .from('products')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) throw error;
+
+            // Lấy public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('products')
+                .getPublicUrl(fileName);
+
+            return publicUrl;
+        } catch (error) {
+            console.error('Upload failed, using base64 fallback:', error);
+            // Nếu lỗi upload, dùng tạm ảnh base64 cũ để không lỗi luồng
+            return base64Image;
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -86,6 +131,16 @@ const AddProductForm = ({ categoryId, onClose }) => {
             const totalQuantity = Object.values(formData.sizeInventory).reduce((sum, qty) => sum + qty, 0);
 
             // Prepare product data - Let Supabase generate ID
+
+            // --- XỬ LÝ UPLOAD ẢNH (MỚI) ---
+            // Duyệt qua các ảnh, nếu là Base64 thì upload lấy link
+            const processedImages = await Promise.all(
+                formData.images.map(async (img, idx) => {
+                    if (!img) return '';
+                    return await uploadImageToSupabase(img, idx);
+                })
+            );
+
             const productData = {
                 sku: formData.sku.trim(), // Trim whitespace
                 name: formData.name,
@@ -95,7 +150,7 @@ const AddProductForm = ({ categoryId, onClose }) => {
                 sizes: formData.sizeInventory, // Map sizeInventory to sizes (JSONB column)
                 quantity: totalQuantity, // Auto-calculated from size inventory
                 category: formData.category,
-                images: formData.images.filter(img => img !== '') // Remove empty images
+                images: processedImages.filter(img => img !== '') // Remove empty images
             };
 
             console.log('Adding product:', productData); // Debug log
@@ -266,6 +321,9 @@ Bạn có muốn hệ thống tự động đổi thành "${newSku}" và tiếp 
                 </div>
             </div>
 
+
+            {/* PHẦN CẤU HÌNH ĐỒNG BỘ & HIỂN THỊ (MỚI) */}
+
             <div className="form-actions">
                 <button type="button" className="btn-cancel" onClick={onClose}>
                     Hủy
@@ -274,7 +332,7 @@ Bạn có muốn hệ thống tự động đổi thành "${newSku}" và tiếp 
                     {uploading ? 'Đang thêm...' : 'Thêm sản phẩm'}
                 </button>
             </div>
-        </form>
+        </form >
     );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
-import { ChevronRight, MessageCircle, Package, Trash2 } from 'lucide-react';
+import { ChevronRight, MessageCircle, Package, Trash2, Edit, Check } from 'lucide-react';
 import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import SizeInventoryEditor from '../components/SizeInventoryEditor';
@@ -14,6 +14,7 @@ const ProductDetail = () => {
     const product = getProductById(productId);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
+    const [activeQuickEditId, setActiveQuickEditId] = useState(null);
 
     if (!product) {
         return (
@@ -71,6 +72,17 @@ const ProductDetail = () => {
         await updateProduct({ ...product, category: newValue });
     };
 
+    const handleQuickCategoryUpdate = async (e, productId, newCategory) => {
+        e.stopPropagation();
+        try {
+            await updateProduct({ id: productId, category: newCategory });
+            setActiveQuickEditId(null);
+            alert('Đã cập nhật danh mục thành công!');
+        } catch (error) {
+            alert('Lỗi cập nhật danh mục: ' + error.message);
+        }
+    };
+
     const handleDeleteProduct = async () => {
         if (window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
             try {
@@ -107,6 +119,32 @@ const ProductDetail = () => {
                             {product.quantity === 0 && (
                                 <div className="sold-overlay">
                                     <div className="sold-stamp">SOLD OUT</div>
+                                </div>
+
+                            )}
+
+                            {isAdmin && editMode && (
+                                <div className="quick-edit-wrapper-detail" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        className="btn-quick-edit-detail"
+                                        onClick={() => setActiveQuickEditId(activeQuickEditId === product.id ? null : product.id)}
+                                    >
+                                        <Edit size={16} /> Sửa Danh Mục
+                                    </button>
+
+                                    {activeQuickEditId === product.id && (
+                                        <div className="quick-edit-menu-detail">
+                                            <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'new')} className={product.category === 'new' ? 'active' : ''}>
+                                                Hàng mới về {product.category === 'new' && <Check size={14} />}
+                                            </button>
+                                            <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'daily')} className={product.category === 'daily' ? 'active' : ''}>
+                                                Giày đi hàng ngày {product.category === 'daily' && <Check size={14} />}
+                                            </button>
+                                            <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'sports')} className={product.category === 'sports' ? 'active' : ''}>
+                                                Giày thể thao {product.category === 'sports' && <Check size={14} />}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -275,13 +313,15 @@ const ProductDetail = () => {
             </div>
 
             {/* Size Inventory Editor Modal */}
-            {showInventoryEditor && (
-                <SizeInventoryEditor
-                    product={product}
-                    onClose={() => setShowInventoryEditor(false)}
-                />
-            )}
-        </div>
+            {
+                showInventoryEditor && (
+                    <SizeInventoryEditor
+                        product={product}
+                        onClose={() => setShowInventoryEditor(false)}
+                    />
+                )
+            }
+        </div >
     );
 };
 

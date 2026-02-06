@@ -170,3 +170,21 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO settings (key, value) VALUES
     ('footer', '{"companyName":"AUTHENTIC LUFFY","address":"125 Lâm Dụ, Long Biên, Hà Nội","phone":"0868.853.9/31","email":"authenticluffy@gmail.com","facebook":"https://www.facebook.com/profile.php?id=61571167698698","policies":{"returns":"Chính sách đổi trả","warranty":"Hướng dẫn mua hàng","privacy":"Bảo mật thông tin"}}'::jsonb)
 ON CONFLICT (key) DO NOTHING;
+ 
+ - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+ - -   M I G R A T I O N :   A d d   T a o b a o   S y n c   F i e l d s  
+ - -   R u n   t h i s   i n   y o u r   S u p a b a s e   S Q L   E d i t o r  
+ - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+  
+ - -   1 .   A d d   t a o b a o _ u r l   c o l u m n  
+ A L T E R   T A B L E   p r o d u c t s    
+ A D D   C O L U M N   I F   N O T   E X I S T S   t a o b a o _ u r l   T E X T ;  
+  
+ - -   2 .   A d d   b a d g e _ l a b e l   c o l u m n  
+ - -   V a l u e s :   ' s a l e ' ,   ' o r d e r _ s a l e ' ,   o r   N U L L  
+ A L T E R   T A B L E   p r o d u c t s    
+ A D D   C O L U M N   I F   N O T   E X I S T S   b a d g e _ l a b e l   T E X T ;  
+  
+ - -   3 .   A d d   I n d e x   f o r   f a s t e r   s e a r c h i n g   o f   s y n c a b l e   p r o d u c t s  
+ C R E A T E   I N D E X   I F   N O T   E X I S T S   i d x _ p r o d u c t s _ t a o b a o _ u r l   O N   p r o d u c t s ( t a o b a o _ u r l ) ;  
+ 

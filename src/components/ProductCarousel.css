@@ -151,3 +151,91 @@
         font-size: 0.9rem;
     }
 }
+
+/* Quick Edit Styles */
+.quick-edit-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+}
+
+.btn-quick-edit {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    color: #333;
+}
+
+.btn-quick-edit:hover {
+    background: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.quick-edit-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eee;
+    width: 170px;
+    overflow: hidden;
+    animation: fadeIn 0.1s ease-out;
+    z-index: 30;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-edit-menu button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.quick-edit-menu button:last-child {
+    border-bottom: none;
+}
+
+.quick-edit-menu button:hover {
+    background: #f8f9fa;
+    color: #000;
+}
+
+.quick-edit-menu button.active {
+    background: #e3f2fd;
+    color: #007bff;
+    font-weight: 500;
+}

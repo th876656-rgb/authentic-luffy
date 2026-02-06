@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, Edit, MoreHorizontal, Check } from 'lucide-react';
 import AddProductForm from '../components/AddProductForm';
 import './CategoryPage.css';
 
@@ -13,10 +14,11 @@ const CategoryPage = () => {
     const isNewArrivals = location.pathname.includes('/new-arrivals');
     const categoryId = isNewArrivals ? 'new' : paramCategoryId;
 
-    const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct } = useProducts();
+    const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct, updateProduct } = useProducts();
     const navigate = useNavigate();
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedSizes, setSelectedSizes] = useState([]);
+    const [activeQuickEditId, setActiveQuickEditId] = useState(null);
 
     const category = getCategoryById(categoryId) || { title: 'Hàng Mới Về', subtitle: 'Bộ sưu tập mới nhất' };
     const allProducts = getProductsByCategory(categoryId);
@@ -76,6 +78,17 @@ const CategoryPage = () => {
         }
     };
 
+    const handleQuickCategoryUpdate = async (e, productId, newCategory) => {
+        e.stopPropagation();
+        try {
+            await updateProduct({ id: productId, category: newCategory });
+            setActiveQuickEditId(null);
+            alert('Đã cập nhật danh mục thành công!');
+        } catch (error) {
+            alert('Lỗi cập nhật danh mục: ' + error.message);
+        }
+    };
+
     return (
         <div className="category-page">
             <div className="category-header">
@@ -127,6 +140,31 @@ const CategoryPage = () => {
 
                             <div className="product-image-wrapper">
                                 <img src={product.images[0]} alt={product.name} />
+
+                                {isAdmin && editMode && (
+                                    <div className="quick-edit-wrapper" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn-quick-edit"
+                                            onClick={() => setActiveQuickEditId(activeQuickEditId === product.id ? null : product.id)}
+                                        >
+                                            <Edit size={14} /> Sửa
+                                        </button>
+
+                                        {activeQuickEditId === product.id && (
+                                            <div className="quick-edit-menu">
+                                                <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'new')} className={product.category === 'new' ? 'active' : ''}>
+                                                    Hàng mới về {product.category === 'new' && <Check size={12} />}
+                                                </button>
+                                                <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'daily')} className={product.category === 'daily' ? 'active' : ''}>
+                                                    Giày đi hàng ngày {product.category === 'daily' && <Check size={12} />}
+                                                </button>
+                                                <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'sports')} className={product.category === 'sports' ? 'active' : ''}>
+                                                    Giày thể thao {product.category === 'sports' && <Check size={12} />}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="product-info">

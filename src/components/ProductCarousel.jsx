@@ -1,13 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit, Check } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import './ProductCarousel.css';
 
 const ProductCarousel = () => {
     const scrollRef = useRef(null);
-    const { products } = useProducts();
+    const { products, updateProduct, isAdmin, editMode } = useProducts();
     const navigate = useNavigate();
+    const [activeQuickEditId, setActiveQuickEditId] = useState(null);
 
     const scroll = (direction) => {
         if (scrollRef.current) {
@@ -23,6 +24,17 @@ const ProductCarousel = () => {
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    };
+
+    const handleQuickCategoryUpdate = async (e, productId, newCategory) => {
+        e.stopPropagation();
+        try {
+            await updateProduct({ id: productId, category: newCategory });
+            setActiveQuickEditId(null);
+            alert('Đã cập nhật danh mục thành công!');
+        } catch (error) {
+            alert('Lỗi cập nhật danh mục: ' + error.message);
+        }
     };
 
     const handleProductClick = (productId) => {
@@ -49,12 +61,39 @@ const ProductCarousel = () => {
                         >
                             <div className="product-image-wrapper">
                                 {product.sale_price && <span className="sale-badge">SALE</span>}
+
                                 {product.quantity === 0 && (
                                     <div className="sold-overlay-mini">
                                         <span>SOLD</span>
                                     </div>
                                 )}
+
                                 <img src={product.images[0]} alt={product.name} className="product-image" />
+
+                                {isAdmin && editMode && (
+                                    <div className="quick-edit-wrapper" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            className="btn-quick-edit"
+                                            onClick={() => setActiveQuickEditId(activeQuickEditId === product.id ? null : product.id)}
+                                        >
+                                            <Edit size={14} /> Sửa
+                                        </button>
+
+                                        {activeQuickEditId === product.id && (
+                                            <div className="quick-edit-menu">
+                                                <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'new')} className={product.category === 'new' ? 'active' : ''}>
+                                                    Hàng mới về {product.category === 'new' && <Check size={12} />}
+                                                </button>
+                                                <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'daily')} className={product.category === 'daily' ? 'active' : ''}>
+                                                    Giày đi hàng ngày {product.category === 'daily' && <Check size={12} />}
+                                                </button>
+                                                <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'sports')} className={product.category === 'sports' ? 'active' : ''}>
+                                                    Giày thể thao {product.category === 'sports' && <Check size={12} />}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             <div className="product-info">
                                 <h3 className="product-name">{product.name}</h3>
@@ -77,7 +116,7 @@ const ProductCarousel = () => {
                     ))}
                 </div>
             </div>
-        </section>
+        </section >
     );
 };
 
