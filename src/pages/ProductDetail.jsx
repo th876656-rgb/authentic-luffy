@@ -12,6 +12,13 @@ const ProductDetail = () => {
     const { getProductById, updateProduct, deleteProduct, isAdmin, editMode } = useProducts();
     const navigate = useNavigate();
     const product = getProductById(productId);
+    const [localCategory, setLocalCategory] = React.useState(product ? product.category : '');
+
+    React.useEffect(() => {
+        if (product) {
+            setLocalCategory(product.category);
+        }
+    }, [product]);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
@@ -69,6 +76,8 @@ const ProductDetail = () => {
     };
 
     const handleSaveCategory = async (newValue) => {
+        // Optimistic update
+        setLocalCategory(newValue);
         await updateProduct({ ...product, category: newValue });
     };
 
@@ -302,7 +311,7 @@ const ProductDetail = () => {
                                 {isAdmin && editMode ? (
                                     <select
                                         className="category-dropdown"
-                                        value={product.category || 'new'}
+                                        value={localCategory || 'new'}
                                         onChange={(e) => handleSaveCategory(e.target.value)}
                                         onClick={(e) => e.stopPropagation()} // Prevent accidental clicks
                                     >
