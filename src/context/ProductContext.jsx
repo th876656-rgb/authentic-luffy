@@ -67,8 +67,17 @@ export const ProductProvider = ({ children }) => {
             console.log('Loaded categories:', loadedCategories?.length || 0, 'items');
             console.log('Loaded hero:', heroData ? 'Yes' : 'No');
 
-            setProducts(loadedProducts || []);
-            setCategories(loadedCategories || []);
+            // Sanitize and set products
+            const sanitizedProducts = (loadedProducts || []).map(p => ({
+                ...p,
+                images: Array.isArray(p.images) ? p.images : [], // Ensure images is array
+                sizes: (p.sizes && typeof p.sizes === 'object') ? p.sizes : (p.sizeInventory || {}), // Normalize sizes
+                category: p.category || 'new'
+            }));
+            const sanitizedCategories = loadedCategories || [];
+
+            setProducts(sanitizedProducts);
+            setCategories(sanitizedCategories);
 
             setHeroContent(heroData);
         } catch (error) {

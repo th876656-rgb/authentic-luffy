@@ -145,7 +145,7 @@ const CategoryPage = () => {
                             )}
 
                             <div className="product-image-wrapper">
-                                <img src={product.images[0]} alt={product.name} />
+                                <img src={product.images?.[0] || ''} alt={product.name} />
 
                                 {isAdmin && editMode && (
                                     <div className="quick-edit-wrapper" onClick={(e) => e.stopPropagation()}>

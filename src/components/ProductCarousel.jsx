@@ -72,7 +72,7 @@ const ProductCarousel = () => {
                                     </div>
                                 )}
 
-                                <img src={product.images[0]} alt={product.name} className="product-image" />
+                                <img src={product.images?.[0] || ''} alt={product.name} className="product-image" />
 
                                 {isAdmin && editMode && (
                                     <div className="quick-edit-wrapper" onClick={(e) => e.stopPropagation()}>

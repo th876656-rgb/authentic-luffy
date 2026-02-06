@@ -128,7 +128,7 @@ const ProductDetail = () => {
                     <div className="product-gallery">
                         <div className="main-image">
                             <EditableImage
-                                src={product.images[mainImageIndex]}
+                                src={product.images?.[mainImageIndex] || ''}
                                 alt={product.name}
                                 onSave={(newSrc) => handleSaveImage(mainImageIndex, newSrc)}
                             />
@@ -165,7 +165,7 @@ const ProductDetail = () => {
                             )}
                         </div>
                         <div className="thumbnail-grid">
-                            {product.images.slice(0, 6).map((img, index) => (
+                            {(product.images || []).slice(0, 6).map((img, index) => (
                                 <div
                                     key={index}
                                     className={`thumbnail ${index === mainImageIndex ? 'active' : ''}`}
