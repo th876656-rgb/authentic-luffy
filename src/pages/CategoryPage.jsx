@@ -5,6 +5,7 @@ import { useProducts } from '../context/ProductContext';
 import { Link } from 'react-router-dom';
 import { Plus, Trash2, Edit, MoreHorizontal, Check } from 'lucide-react';
 import AddProductForm from '../components/AddProductForm';
+import { SkeletonProductCard } from '../components/SkeletonComponents';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
@@ -15,7 +16,7 @@ const CategoryPage = () => {
     const isNewArrivals = location.pathname.includes('/new-arrivals');
     const categoryId = isNewArrivals ? 'new' : paramCategoryId;
 
-    const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct, updateProduct } = useProducts();
+    const { getProductsByCategory, getCategoryById, isAdmin, editMode, deleteProduct, addProduct, updateProduct, loading } = useProducts();
     const navigate = useNavigate();
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedSizes, setSelectedSizes] = useState([]);
@@ -123,7 +124,11 @@ const CategoryPage = () => {
                 </div>
 
                 <div className="products-grid">
-                    {products.map((product) => (
+                    {loading ? (
+                        Array(8).fill(0).map((_, index) => (
+                            <SkeletonProductCard key={index} />
+                        ))
+                    ) : products.map((product) => (
                         <div
                             key={product.id}
                             className={`product-card ${product.quantity === 0 ? 'sold-out' : ''}`}

@@ -5,11 +5,12 @@ import { ChevronRight, MessageCircle, Package, Trash2, Edit, Check } from 'lucid
 import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import SizeInventoryEditor from '../components/SizeInventoryEditor';
+import { SkeletonProductDetail } from '../components/SkeletonComponents';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
     const { productId } = useParams();
-    const { getProductById, updateProduct, deleteProduct, isAdmin, editMode } = useProducts();
+    const { getProductById, updateProduct, deleteProduct, isAdmin, editMode, loading } = useProducts();
     const navigate = useNavigate();
     const product = getProductById(productId);
     const [localCategory, setLocalCategory] = React.useState(product ? product.category : '');
@@ -24,7 +25,10 @@ const ProductDetail = () => {
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
 
-
+    // Show skeleton while loading unique product data
+    if (loading && !product) {
+        return <SkeletonProductDetail />;
+    }
 
     if (!product) {
         return (

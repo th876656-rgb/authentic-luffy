@@ -2,11 +2,12 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Edit, Check } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
+import { SkeletonProductCard } from '../components/SkeletonComponents';
 import './ProductCarousel.css';
 
 const ProductCarousel = () => {
     const scrollRef = useRef(null);
-    const { products, updateProduct, isAdmin, editMode } = useProducts();
+    const { products, updateProduct, isAdmin, editMode, loading } = useProducts();
     const navigate = useNavigate();
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
 
@@ -52,7 +53,11 @@ const ProductCarousel = () => {
                 </div>
 
                 <div className="carousel-container" ref={scrollRef}>
-                    {products.map((product) => (
+                    {loading ? (
+                        Array(5).fill(0).map((_, index) => (
+                            <SkeletonProductCard key={index} />
+                        ))
+                    ) : products.map((product) => (
                         <div
                             key={product.id}
                             className="product-card"

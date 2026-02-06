@@ -1,0 +1,87 @@
+/* Skeleton Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: #1f2937;
+    /* Base color match dark theme */
+    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+/* Skeleton Card */
+.skeleton-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+.skeleton-info {
+    padding: 16px;
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    width: 80%;
+}
+
+.skeleton-text.short {
+    width: 40%;
+}
+
+.skeleton-text.price {
+    height: 24px;
+    width: 60%;
+    margin-top: 12px;
+}
+
+/* Skeleton Detail Page */
+.skeleton-detail-container {
+    padding-top: calc(var(--header-height) + 40px);
+}
+
+.skeleton-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+}
+
+.skeleton-main-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+}
+
+.skeleton-title {
+    height: 40px;
+    width: 70%;
+    margin-bottom: 20px;
+}
+
+.skeleton-desc {
+    height: 100px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 968px) {
+    .skeleton-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
