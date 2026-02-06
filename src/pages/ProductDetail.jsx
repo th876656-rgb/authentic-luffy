@@ -298,11 +298,25 @@ const ProductDetail = () => {
                         <div className="product-meta">
                             <div className="meta-item">
                                 <strong>Danh mục:</strong>{' '}
-                                <EditableText
-                                    value={product.category}
-                                    onSave={handleSaveCategory}
-                                    tag="span"
-                                />
+                                <strong>Danh mục:</strong>{' '}
+                                {isAdmin && editMode ? (
+                                    <select
+                                        className="category-dropdown"
+                                        value={product.category || 'new'}
+                                        onChange={(e) => handleSaveCategory(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()} // Prevent accidental clicks
+                                    >
+                                        <option value="new">Hàng mới về</option>
+                                        <option value="daily">Giày đi hàng ngày</option>
+                                        <option value="sports">Giày thể thao</option>
+                                    </select>
+                                ) : (
+                                    <span>
+                                        {product.category === 'new' ? 'Hàng mới về' :
+                                            product.category === 'daily' ? 'Giày đi hàng ngày' :
+                                                product.category === 'sports' ? 'Giày thể thao' : product.category}
+                                    </span>
+                                )}
                             </div>
                             <div className="meta-item">
                                 <strong>Tình trạng:</strong> 100% Authentic
