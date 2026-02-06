@@ -12,12 +12,21 @@ export const useProducts = () => {
 };
 
 export const ProductProvider = ({ children }) => {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState(() => {
+        const saved = localStorage.getItem('products');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [categories, setCategories] = useState(() => {
+        const saved = localStorage.getItem('categories');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [heroContent, setHeroContent] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => {
+        // If we have products cached, don't show loading state initially
+        return !localStorage.getItem('products');
+    });
 
     // Initialize database and load data
     useEffect(() => {
@@ -69,6 +78,11 @@ export const ProductProvider = ({ children }) => {
 
             setProducts(loadedProducts || []);
             setCategories(loadedCategories || []);
+
+            // Cache data
+            localStorage.setItem('products', JSON.stringify(loadedProducts || []));
+            localStorage.setItem('categories', JSON.stringify(loadedCategories || []));
+
             setHeroContent(heroData);
         } catch (error) {
             console.error('Failed to load data:', error);

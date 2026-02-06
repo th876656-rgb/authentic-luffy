@@ -9,7 +9,7 @@ import './ProductDetail.css';
 
 const ProductDetail = () => {
     const { productId } = useParams();
-    const { getProductById, updateProduct, deleteProduct, isAdmin, editMode } = useProducts();
+    const { getProductById, updateProduct, deleteProduct, isAdmin, editMode, loading } = useProducts();
     const navigate = useNavigate();
     const product = getProductById(productId);
     const [localCategory, setLocalCategory] = React.useState(product ? product.category : '');
@@ -19,9 +19,22 @@ const ProductDetail = () => {
             setLocalCategory(product.category);
         }
     }, [product]);
+
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
+
+    if (loading && !product) {
+        return (
+            <div className="product-detail-page">
+                <div className="container">
+                    <div className="loading-spinner-container">
+                        <div className="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!product) {
         return (
