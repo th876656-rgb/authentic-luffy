@@ -509,3 +509,10 @@
     border-color: #3b82f6;
     background: rgba(255, 255, 255, 0.15);
 }
+
+.size-option.selected {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}

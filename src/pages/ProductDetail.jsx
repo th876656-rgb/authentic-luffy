@@ -24,6 +24,7 @@ const ProductDetail = () => {
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
 
     // Show skeleton while loading unique product data
     if (loading && !product) {
@@ -48,6 +49,33 @@ const ProductDetail = () => {
     };
 
     const messengerUrl = 'https://www.facebook.com/messages/t/108426057420816';
+
+    const handleContactMessenger = async (e) => {
+        e.preventDefault();
+
+        // Construct message details
+        const productUrl = window.location.href;
+        const sizeText = selectedSize ? `Size: ${selectedSize}` : 'Chưa chọn size';
+        const priceText = product.sale_price ? formatPrice(product.sale_price) : formatPrice(product.price);
+
+        const message = `
+Thông tin sản phẩm:
+- Tên: ${product.name}
+- Giá: ${priceText}
+- ${sizeText}
+- Link: ${productUrl}
+        `.trim();
+
+        try {
+            await navigator.clipboard.writeText(message);
+            alert('Đã copy thông tin sản phẩm! Bạn hãy dán (Paste) vào Messenger nhé.');
+            window.open(messengerUrl, '_blank');
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            // Fallback if clipboard fails
+            window.open(messengerUrl, '_blank');
+        }
+    };
 
     // Save handlers
     const handleSaveSKU = async (newValue) => {
@@ -260,7 +288,8 @@ const ProductDetail = () => {
                                         return Object.entries(inventory).map(([size, qty]) => (
                                             <div
                                                 key={size}
-                                                className={`size-option ${qty === 0 ? 'sold-out' : ''} ${qty > 0 && qty <= 2 ? 'low-stock' : ''}`}
+                                                className={`size-option ${qty === 0 ? 'sold-out' : ''} ${qty > 0 && qty <= 2 ? 'low-stock' : ''} ${selectedSize === size ? 'selected' : ''}`}
+                                                onClick={() => qty > 0 && setSelectedSize(size)}
                                             >
                                                 {size}
                                                 {qty > 0 && qty <= 2 && <span className="stock-badge">Sắp hết</span>}
@@ -269,7 +298,13 @@ const ProductDetail = () => {
                                         ));
                                     } else if (legacySizes) {
                                         return legacySizes.map((size) => (
-                                            <div key={size} className="size-option">{size}</div>
+                                            <div
+                                                key={size}
+                                                className={`size-option ${selectedSize === size ? 'selected' : ''}`}
+                                                onClick={() => setSelectedSize(size)}
+                                            >
+                                                {size}
+                                            </div>
                                         ));
                                     }
                                     return null;
@@ -291,8 +326,7 @@ const ProductDetail = () => {
                         {/* Contact Button */}
                         <a
                             href={messengerUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            onClick={handleContactMessenger}
                             className="btn-contact-messenger"
                         >
                             <MessageCircle size={20} />
