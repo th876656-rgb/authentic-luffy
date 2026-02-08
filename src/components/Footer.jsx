@@ -36,6 +36,16 @@ const Footer = () => {
         }
     };
 
+    const saveFooterData = async (newData) => {
+        try {
+            await db.updateSetting('footer', newData);
+            setFooterData(newData);
+        } catch (error) {
+            console.error('Failed to save footer data:', error);
+            alert('Lỗi khi lưu thông tin footer');
+        }
+    };
+
     const handleSaveAddress = async (newValue) => {
         const newData = { ...footerData, address: newValue };
         await saveFooterData(newData);
@@ -110,7 +120,7 @@ const Footer = () => {
                     <div className="footer-col">
                         <h3 className="footer-title">CHÍNH SÁCH</h3>
                         <ul className="footer-links">
-                            <li><Link to="/policy/return">Chính sách đổi trả</Link></li>
+                            <li><Link to="/policy/return">Chính sách đổi</Link></li>
                             <li><Link to="/policy/guide">Hướng dẫn mua hàng</Link></li>
                             <li><Link to="/policy/privacy">Bảo mật thông tin</Link></li>
                         </ul>

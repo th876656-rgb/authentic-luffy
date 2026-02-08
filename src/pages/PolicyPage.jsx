@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Edit, Save, X, Plus, Trash2 } from 'lucide-react';
+
 import { useProducts } from '../context/ProductContext';
+import db from '../utils/db';
 import './PolicyPage.css';
 
 const defaultPolicyContent = {
     return: {
-        title: 'Chính Sách Đổi Trả',
+        title: 'Chính Sách Đổi',
         sections: [
             {
                 heading: 'Điều kiện đổi trả',
@@ -115,14 +117,13 @@ const PolicyPage = ({ type }) => {
 
     const loadPolicyData = async () => {
         try {
-            // Try to load from localStorage
+            // Load from database (settings table)
             const savedKey = `policy_${type}`;
-            const saved = localStorage.getItem(savedKey);
+            const saved = await db.getSetting(savedKey);
 
             if (saved) {
-                const parsedData = JSON.parse(saved);
-                setPolicyData(parsedData);
-                setEditData(parsedData);
+                setPolicyData(saved);
+                setEditData(saved);
             } else {
                 const defaultData = defaultPolicyContent[type];
                 setPolicyData(defaultData);
@@ -138,14 +139,16 @@ const PolicyPage = ({ type }) => {
 
     const handleSave = async () => {
         try {
-            // Save to localStorage
+            // Save to database
             const savedKey = `policy_${type}`;
-            localStorage.setItem(savedKey, JSON.stringify(editData));
+            await db.updateSetting(savedKey, editData);
+
             setPolicyData(editData);
             setIsEditing(false);
+            alert('Đã lưu nội dung thành công!');
         } catch (error) {
             console.error('Failed to save policy:', error);
-            alert('Không thể lưu chính sách!');
+            alert('Không thể lưu chính sách: ' + error.message);
         }
     };
 

@@ -66,7 +66,7 @@ const CategoryPage = () => {
     };
 
     const handleProductClick = (productId) => {
-        navigate(`/ product / ${productId} `);
+        navigate(`/product/${productId}`);
     };
 
     const handleDeleteProduct = async (e, productId) => {
