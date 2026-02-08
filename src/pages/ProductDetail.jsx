@@ -66,15 +66,42 @@ Thông tin sản phẩm:
 - Link: ${productUrl}
         `.trim();
 
-        try {
-            await navigator.clipboard.writeText(message);
+        const copyToClipboard = async (text) => {
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+                throw new Error('Clipboard API not available');
+            } catch (err) {
+                // Fallback for older browsers or non-secure contexts
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    return successful;
+                } catch (fallbackErr) {
+                    console.error('Fallback copy failed:', fallbackErr);
+                    return false;
+                }
+            }
+        };
+
+        const success = await copyToClipboard(message);
+
+        if (success) {
             alert('Đã copy thông tin sản phẩm! Bạn hãy dán (Paste) vào Messenger nhé.');
-            window.open(messengerUrl, '_blank');
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-            // Fallback if clipboard fails
-            window.open(messengerUrl, '_blank');
+        } else {
+            alert('Không thể tự động copy. Bạn vui lòng gửi link sản phẩm cho shop nhé!');
         }
+
+        window.open(messengerUrl, '_blank');
     };
 
     // Save handlers
