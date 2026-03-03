@@ -162,7 +162,7 @@ const CategoryPage = () => {
                                                     Hàng mới về {product.category === 'new' && <Check size={12} />}
                                                 </button>
                                                 <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'daily')} className={product.category === 'daily' ? 'active' : ''}>
-                                                    Giày đi hàng ngày {product.category === 'daily' && <Check size={12} />}
+                                                    Giày thời trang {product.category === 'daily' && <Check size={12} />}
                                                 </button>
                                                 <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'sports')} className={product.category === 'sports' ? 'active' : ''}>
                                                     Giày thể thao {product.category === 'sports' && <Check size={12} />}

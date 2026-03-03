@@ -209,7 +209,7 @@ Thông tin sản phẩm:
                                                 Hàng mới về {product.category === 'new' && <Check size={14} />}
                                             </button>
                                             <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'daily')} className={product.category === 'daily' ? 'active' : ''}>
-                                                Giày đi hàng ngày {product.category === 'daily' && <Check size={14} />}
+                                                Giày thời trang {product.category === 'daily' && <Check size={14} />}
                                             </button>
                                             <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'sports')} className={product.category === 'sports' ? 'active' : ''}>
                                                 Giày thể thao {product.category === 'sports' && <Check size={14} />}
@@ -384,13 +384,13 @@ Thông tin sản phẩm:
                                         onClick={(e) => e.stopPropagation()} // Prevent accidental clicks
                                     >
                                         <option value="new">Hàng mới về</option>
-                                        <option value="daily">Giày đi hàng ngày</option>
+                                        <option value="daily">Giày thời trang</option>
                                         <option value="sports">Giày thể thao</option>
                                     </select>
                                 ) : (
                                     <span>
                                         {product.category === 'new' ? 'Hàng mới về' :
-                                            product.category === 'daily' ? 'Giày đi hàng ngày' :
+                                            product.category === 'daily' ? 'Giày thời trang' :
                                                 product.category === 'sports' ? 'Giày thể thao' : product.category}
                                     </span>
                                 )}

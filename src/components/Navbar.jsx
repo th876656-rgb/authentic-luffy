@@ -152,9 +152,9 @@ const Navbar = () => {
                         <Link to="/new-arrivals" className="nav-link text-accent font-bold">Săn Sale Authentic</Link>
                     </div>
                     <div className="menu-bottom">
-                        <Link to="/category/daily" className="nav-link">Giày Đi Hàng Ngày</Link>
+                        <Link to="/category/daily" className="nav-link">Giày Thời Trang</Link>
                         <span className="separator">|</span>
-                        <Link to="/category/sports" className="nav-link">Giày Chơi Thể Thao</Link>
+                        <Link to="/category/sports" className="nav-link">Giày Thể Thao</Link>
                     </div>
                 </div>
 
@@ -221,10 +221,10 @@ const Navbar = () => {
                     Săn Sale Authentic
                 </Link>
                 <Link to="/category/daily" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
-                    Giày Đi Hàng Ngày
+                    Giày Thời Trang
                 </Link>
                 <Link to="/category/sports" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
-                    Giày Chơi Thể Thao
+                    Giày Thể Thao
                 </Link>
                 <div className="mobile-store-info">
                     <div>Hotline: 0868.653.931</div>
