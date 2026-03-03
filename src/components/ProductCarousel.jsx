@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Edit, Check } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { SkeletonProductCard } from '../components/SkeletonComponents';
+import OptimizedImage from './OptimizedImage';
 import './ProductCarousel.css';
 
 const ProductCarousel = () => {
@@ -57,7 +58,7 @@ const ProductCarousel = () => {
                         Array(5).fill(0).map((_, index) => (
                             <SkeletonProductCard key={index} />
                         ))
-                    ) : products.map((product) => (
+                    ) : products.map((product, index) => (
                         <div
                             key={product.id}
                             className="product-card"
@@ -72,7 +73,12 @@ const ProductCarousel = () => {
                                     </div>
                                 )}
 
-                                <img src={product.images?.[0] || ''} alt={product.name} className="product-image" />
+                                <OptimizedImage
+                                    src={product.images?.[0] || ''}
+                                    alt={product.name}
+                                    className="product-image"
+                                    priority={index < 3}
+                                />
 
                                 {isAdmin && editMode && (
                                     <div className="quick-edit-wrapper" onClick={(e) => e.stopPropagation()}>

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Trash2, Edit, MoreHorizontal, Check } from 'lucide-react';
 import AddProductForm from '../components/AddProductForm';
 import { SkeletonProductCard } from '../components/SkeletonComponents';
+import OptimizedImage from '../components/OptimizedImage';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
@@ -128,7 +129,7 @@ const CategoryPage = () => {
                         Array(8).fill(0).map((_, index) => (
                             <SkeletonProductCard key={index} />
                         ))
-                    ) : products.map((product) => (
+                    ) : products.map((product, index) => (
                         <div
                             key={product.id}
                             className={`product-card ${product.quantity === 0 ? 'sold-out' : ''}`}
@@ -145,7 +146,11 @@ const CategoryPage = () => {
                             )}
 
                             <div className="product-image-wrapper">
-                                <img src={product.images?.[0] || ''} alt={product.name} />
+                                <OptimizedImage
+                                    src={product.images?.[0] || ''}
+                                    alt={product.name}
+                                    priority={index < 4}
+                                />
 
                                 {isAdmin && editMode && (
                                     <div className="quick-edit-wrapper" onClick={(e) => e.stopPropagation()}>

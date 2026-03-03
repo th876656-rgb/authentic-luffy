@@ -48,14 +48,16 @@
     height: 100%;
 }
 
-.card-image img {
+.card-image img,
+.card-image .opt-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
 }
 
-.category-card:hover .card-image img {
+.category-card:hover .card-image img,
+.category-card:hover .card-image .opt-img {
     transform: scale(1.1);
 }
 

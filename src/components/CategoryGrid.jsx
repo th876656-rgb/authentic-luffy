@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import { Edit, Upload, Save, X } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 import './CategoryGrid.css';
 
 const CategoryGrid = () => {
@@ -57,7 +58,11 @@ const CategoryGrid = () => {
                             onClick={() => handleCategoryClick(cat.id)}
                         >
                             <div className="card-image">
-                                <img src={editingId === cat.id ? editData.image : cat.image} alt={cat.title} />
+                                <OptimizedImage
+                                    src={editingId === cat.id ? editData.image : cat.image}
+                                    alt={cat.title}
+                                    priority={true}
+                                />
                                 {isAdmin && editMode && editingId === cat.id && (
                                     <label className="image-upload-overlay">
                                         <Upload size={24} />
