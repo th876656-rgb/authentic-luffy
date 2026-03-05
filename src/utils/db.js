@@ -68,36 +68,6 @@ class Database {
         return true;
     }
 
-    /**
-     * Upload a composite (base64 data URL) to Supabase Storage.
-     * Returns the public URL of the uploaded file.
-     * @param {string} productId - Product ID (used as file name)
-     * @param {string} dataUrl   - Canvas data URL (image/png)
-     */
-    async uploadProductComposite(productId, dataUrl) {
-        // Convert data URL to Blob
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-
-        const filePath = `composites/${productId}.png`;
-
-        // Try to remove old file first (ignore errors)
-        await supabase.storage.from('products').remove([filePath]).catch(() => { });
-
-        const { error: uploadError } = await supabase.storage
-            .from('products')
-            .upload(filePath, blob, {
-                contentType: 'image/png',
-                upsert: true,
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage.from('products').getPublicUrl(filePath);
-        return data.publicUrl;
-    }
-
-
     async clearStore(storeName) {
         const { error } = await supabase
             .from(storeName)

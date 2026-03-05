@@ -6,8 +6,6 @@ import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import SizeInventoryEditor from '../components/SizeInventoryEditor';
 import { SkeletonProductDetail } from '../components/SkeletonComponents';
-import { createComposite } from '../hooks/useProductBackground';
-import db from '../utils/db';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -27,11 +25,6 @@ const ProductDetail = () => {
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
-    const [productBg, setProductBg] = useState(() => {
-        try {
-            return localStorage.getItem(`product_bg_${productId}`) || null;
-        } catch (e) { return null; }
-    });
 
     // Show skeleton while loading unique product data
     if (loading && !product) {
@@ -144,45 +137,6 @@ Thông tin sản phẩm:
         await updateProduct({ ...product, images: newImages });
     };
 
-    const handleSaveBackground = (bgUrl) => {
-        // === 1. Update UI immediately (synchronous, 0ms) ===
-        try {
-            if (bgUrl) localStorage.setItem(`product_bg_${productId}`, bgUrl);
-            else localStorage.removeItem(`product_bg_${productId}`);
-            setProductBg(bgUrl);
-        } catch { }
-
-        // === 2. Sync to Supabase in background (non-blocking) ===
-        const syncToSupabase = async () => {
-            const originalImg = product.images?.[0] || '';
-            if (bgUrl && originalImg) {
-                if (!localStorage.getItem(`product_orig_img_${productId}`)) {
-                    localStorage.setItem(`product_orig_img_${productId}`, originalImg);
-                }
-                const compositeDataUrl = await createComposite(originalImg, bgUrl);
-                if (compositeDataUrl) {
-                    const compositeUrl = await db.uploadProductComposite(productId, compositeDataUrl);
-                    const newImages = [...(product.images || [])];
-                    newImages[0] = compositeUrl;
-                    await updateProduct({ ...product, images: newImages });
-                    try { localStorage.setItem(`product_composite_${productId}`, compositeDataUrl); } catch { }
-                }
-            } else if (!bgUrl) {
-                const orig = localStorage.getItem(`product_orig_img_${productId}`);
-                if (orig) {
-                    const newImages = [...(product.images || [])];
-                    newImages[0] = orig;
-                    await updateProduct({ ...product, images: newImages });
-                    localStorage.removeItem(`product_orig_img_${productId}`);
-                    localStorage.removeItem(`product_composite_${productId}`);
-                }
-            }
-        };
-        syncToSupabase().catch(console.error);
-
-        // Return a resolved promise so callers can use .catch()
-        return Promise.resolve();
-    };
 
     const handleSaveCategory = async (newValue) => {
         // Optimistic update
@@ -233,9 +187,6 @@ Thông tin sản phẩm:
                                 src={product.images?.[mainImageIndex] || ''}
                                 alt={product.name}
                                 onSave={(newSrc) => handleSaveImage(mainImageIndex, newSrc)}
-                                productBackground={productBg}
-                                onSaveBackground={handleSaveBackground}
-                                productId={product.id}
                             />
                             {product.quantity === 0 && (
                                 <div className="sold-overlay">

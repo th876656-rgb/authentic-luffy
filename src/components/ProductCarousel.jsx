@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Edit, Check } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { SkeletonProductCard } from '../components/SkeletonComponents';
 import OptimizedImage from './OptimizedImage';
-import ProductImage from './ProductImage';
 import './ProductCarousel.css';
 
 const ProductCarousel = () => {
@@ -74,8 +73,7 @@ const ProductCarousel = () => {
                                     </div>
                                 )}
 
-                                <ProductImage
-                                    productId={product.id}
+                                <OptimizedImage
                                     src={product.images?.[0] || ''}
                                     alt={product.name}
                                     className="product-image"
