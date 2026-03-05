@@ -99,7 +99,7 @@ const EditableImage = ({
 
     if (!isAdmin || !editMode) {
         return (
-            <div className={`editable-image-wrapper ${className}`} style={{ position: 'relative', ...style }}>
+            <div className={`editable-image-wrapper ${className}`} style={{ position: 'relative', background: productBackground ? 'transparent' : undefined, ...style }}>
                 {productBackground && (
                     <img src={productBackground} alt="background" className="product-bg-layer" />
                 )}
@@ -107,7 +107,7 @@ const EditableImage = ({
                     src={src}
                     alt={alt}
                     className={`editable-image ${className}`}
-                    style={{ position: 'relative', zIndex: 1 }}
+                    style={{ position: 'relative', zIndex: 1, objectFit: 'contain', mixBlendMode: productBackground ? 'multiply' : 'normal' }}
                 />
             </div>
         );
@@ -124,7 +124,12 @@ const EditableImage = ({
                 src={displaySrc}
                 alt={alt}
                 className={`editable-image ${className}`}
-                style={{ position: 'relative', zIndex: 1 }}
+                style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    objectFit: 'contain',
+                    mixBlendMode: activeBg ? 'multiply' : 'normal'
+                }}
                 onClick={handleImageClick}
             />
 
