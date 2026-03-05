@@ -6,6 +6,8 @@ import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import SizeInventoryEditor from '../components/SizeInventoryEditor';
 import { SkeletonProductDetail } from '../components/SkeletonComponents';
+import { createComposite } from '../hooks/useProductBackground';
+import db from '../utils/db';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -142,14 +144,48 @@ Thông tin sản phẩm:
         await updateProduct({ ...product, images: newImages });
     };
 
-    const handleSaveBackground = (bgUrl) => {
+    const handleSaveBackground = async (bgUrl) => {
         try {
+            // Save background URL to localStorage for local preview
             if (bgUrl) {
                 localStorage.setItem(`product_bg_${productId}`, bgUrl);
             } else {
                 localStorage.removeItem(`product_bg_${productId}`);
             }
             setProductBg(bgUrl);
+
+            const originalImg = product.images?.[0] || '';
+
+            if (bgUrl && originalImg) {
+                // Save original image so we can restore it later
+                if (!localStorage.getItem(`product_orig_img_${productId}`)) {
+                    localStorage.setItem(`product_orig_img_${productId}`, originalImg);
+                }
+
+                // Compute composite
+                const compositeDataUrl = await createComposite(originalImg, bgUrl);
+
+                if (compositeDataUrl) {
+                    // Upload composite to Supabase storage
+                    const compositeUrl = await db.uploadProductComposite(productId, compositeDataUrl);
+                    // Update product.images[0] with the public composite URL
+                    const newImages = [...(product.images || [])];
+                    newImages[0] = compositeUrl;
+                    await updateProduct({ ...product, images: newImages });
+                    // Cache locally too
+                    try { localStorage.setItem(`product_composite_${productId}`, compositeDataUrl); } catch { }
+                }
+            } else if (!bgUrl) {
+                // Restore original image[0]
+                const orig = localStorage.getItem(`product_orig_img_${productId}`);
+                if (orig) {
+                    const newImages = [...(product.images || [])];
+                    newImages[0] = orig;
+                    await updateProduct({ ...product, images: newImages });
+                    localStorage.removeItem(`product_orig_img_${productId}`);
+                    localStorage.removeItem(`product_composite_${productId}`);
+                }
+            }
         } catch (e) {
             console.error('Failed to save background:', e);
         }
