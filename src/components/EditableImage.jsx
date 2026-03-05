@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Save, X, Image as ImageIcon, Layers } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import './EditableImage.css';
@@ -11,6 +11,75 @@ const PRESET_BACKGROUNDS = [
     { id: 'gradient', label: 'Holographic', url: '/bg_gradient.png' },
     { id: 'dark_glow', label: 'Cyberpunk Tối', url: '/bg_dark_glow.png' },
 ];
+
+/**
+ * Composite shoe image onto a background using Canvas.
+ * Removes white/light background from the shoe image.
+ */
+const createComposite = (shoeSrc, bgSrc) => {
+    return new Promise((resolve) => {
+        const shoeImg = new Image();
+        shoeImg.crossOrigin = 'anonymous';
+
+        shoeImg.onload = () => {
+            const bgImg = new Image();
+            bgImg.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = shoeImg.naturalWidth;
+                canvas.height = shoeImg.naturalHeight;
+                const ctx = canvas.getContext('2d');
+
+                // Draw background scaled to shoe image size
+                ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+                // Draw shoe to a temp canvas to get pixel data
+                const tmp = document.createElement('canvas');
+                tmp.width = shoeImg.naturalWidth;
+                tmp.height = shoeImg.naturalHeight;
+                const tctx = tmp.getContext('2d');
+                tctx.drawImage(shoeImg, 0, 0);
+
+                let imageData;
+                try {
+                    imageData = tctx.getImageData(0, 0, tmp.width, tmp.height);
+                } catch (e) {
+                    // CORS issue – just overlay without bg removal
+                    ctx.drawImage(shoeImg, 0, 0);
+                    resolve(canvas.toDataURL('image/jpeg', 0.92));
+                    return;
+                }
+
+                const d = imageData.data;
+                const THRESHOLD = 230; // white-ish threshold
+                const FEATHER = 20;    // anti-alias range
+
+                for (let i = 0; i < d.length; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const brightness = (r + g + b) / 3;
+                    if (brightness >= THRESHOLD) {
+                        d[i + 3] = 0; // fully transparent
+                    } else if (brightness >= THRESHOLD - FEATHER) {
+                        // Gradual fade at edge
+                        const alpha = Math.round(((THRESHOLD - brightness) / FEATHER) * 255);
+                        d[i + 3] = alpha;
+                    }
+                }
+
+                tctx.putImageData(imageData, 0, 0);
+                ctx.drawImage(tmp, 0, 0);
+
+                resolve(canvas.toDataURL('image/jpeg', 0.92));
+            };
+            bgImg.onerror = () => {
+                // bg failed – just resolve with shoe as-is
+                resolve(shoeSrc);
+            };
+            bgImg.src = bgSrc;
+        };
+        shoeImg.onerror = () => resolve(shoeSrc);
+        shoeImg.src = shoeSrc;
+    });
+};
 
 const EditableImage = ({
     src,
@@ -28,8 +97,23 @@ const EditableImage = ({
     const [previewSrc, setPreviewSrc] = useState(null);
     const [selectedBg, setSelectedBg] = useState(productBackground || null);
     const [customBgPreview, setCustomBgPreview] = useState(null);
+    const [compositeSrc, setCompositeSrc] = useState(null);
+    const [isCompositing, setIsCompositing] = useState(false);
     const fileInputRef = useRef(null);
     const bgInputRef = useRef(null);
+
+    // Whenever productBackground or src changes, create a composite
+    useEffect(() => {
+        if (productBackground && src) {
+            setIsCompositing(true);
+            createComposite(src, productBackground).then(result => {
+                setCompositeSrc(result);
+                setIsCompositing(false);
+            });
+        } else {
+            setCompositeSrc(null);
+        }
+    }, [productBackground, src]);
 
     const handleImageClick = () => {
         if (isAdmin && editMode && !isEditing && !showBgPanel) {
@@ -94,44 +178,34 @@ const EditableImage = ({
         setShowBgPanel(false);
     };
 
-    const displaySrc = previewSrc || src;
-    const activeBg = showBgPanel ? selectedBg : productBackground;
+    // Display: if a background is active, show the composited canvas image
+    const displaySrc = previewSrc || (productBackground ? (compositeSrc || src) : src);
 
     if (!isAdmin || !editMode) {
         return (
-            <div className={`editable-image-wrapper ${className}`} style={{ position: 'relative', background: productBackground ? 'transparent' : undefined, ...style }}>
-                {productBackground && (
-                    <img src={productBackground} alt="background" className="product-bg-layer" />
-                )}
+            <div className={`editable-image-wrapper ${className}`} style={{ position: 'relative', ...style }}>
                 <img
-                    src={src}
+                    src={displaySrc}
                     alt={alt}
                     className={`editable-image ${className}`}
-                    style={{ position: 'relative', zIndex: 1, objectFit: 'contain', mixBlendMode: productBackground ? 'multiply' : 'normal' }}
+                    style={{ position: 'relative', zIndex: 1 }}
                 />
+                {isCompositing && <div className="compositing-overlay">Đang xử lý...</div>}
             </div>
         );
     }
 
     return (
         <div className={`editable-image-wrapper ${isEditing || showBgPanel ? 'editing' : ''}`}>
-            {/* Background layer */}
-            {activeBg && (
-                <img src={activeBg} alt="background" className="product-bg-layer" />
-            )}
-
             <img
                 src={displaySrc}
                 alt={alt}
                 className={`editable-image ${className}`}
-                style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    objectFit: 'contain',
-                    mixBlendMode: activeBg ? 'multiply' : 'normal'
-                }}
+                style={{ position: 'relative', zIndex: 1 }}
                 onClick={handleImageClick}
             />
+
+            {isCompositing && <div className="compositing-overlay">⚙️ Đang xử lý nền...</div>}
 
             {/* Normal edit overlay (when not in bg panel mode) */}
             {!isEditing && !showBgPanel && (
