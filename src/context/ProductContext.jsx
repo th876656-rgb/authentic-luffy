@@ -81,10 +81,7 @@ export const ProductProvider = ({ children }) => {
                 sizes: (p.sizes && typeof p.sizes === 'object') ? p.sizes : (p.sizeInventory || {}), // Normalize sizes
                 category: p.category || 'new'
             }));
-            const sanitizedCategories = (loadedCategories || []).map(c => ({
-                ...c,
-                image: c.image_url || c.image
-            }));
+            const sanitizedCategories = loadedCategories || [];
 
             setProducts(sanitizedProducts);
             setCategories(sanitizedCategories);
@@ -174,11 +171,7 @@ export const ProductProvider = ({ children }) => {
             const category = categories.find(c => c.id === categoryId);
             if (!category) throw new Error('Category not found');
 
-            const updatedCategory = { ...category, ...data, image_url: data.image || category.image };
-            // Ensure we don't send the virtual 'image' property to the DB if it expects 'image_url' natively (though our mock DB might just take it).
-            // Actually, based on the DB schema, the column is 'image_url'.
-            delete updatedCategory.image;
-
+            const updatedCategory = { ...category, ...data };
             await db.update('categories', updatedCategory);
             await loadData();
         } catch (error) {
