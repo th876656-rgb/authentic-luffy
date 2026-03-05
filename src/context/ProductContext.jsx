@@ -39,7 +39,13 @@ export const ProductProvider = ({ children }) => {
     });
     const [isAdmin, setIsAdmin] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => {
+        try {
+            return !localStorage.getItem('products') || !localStorage.getItem('categories');
+        } catch (e) {
+            return true;
+        }
+    });
 
     // Initialize database and load data
     useEffect(() => {
