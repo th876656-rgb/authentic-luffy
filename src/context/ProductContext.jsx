@@ -14,7 +14,14 @@ export const useProducts = () => {
 export const ProductProvider = ({ children }) => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [heroContent, setHeroContent] = useState(null);
+    const [heroContent, setHeroContent] = useState(() => {
+        try {
+            const cached = localStorage.getItem('heroContent');
+            return cached ? JSON.parse(cached) : null;
+        } catch (e) {
+            return null;
+        }
+    });
     const [isAdmin, setIsAdmin] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -80,6 +87,9 @@ export const ProductProvider = ({ children }) => {
             setCategories(sanitizedCategories);
 
             setHeroContent(heroData);
+            if (heroData) {
+                localStorage.setItem('heroContent', JSON.stringify(heroData));
+            }
         } catch (error) {
             console.error('Failed to load data:', error);
             // Set empty defaults to prevent crashes

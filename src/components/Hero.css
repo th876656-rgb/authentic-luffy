@@ -5,7 +5,7 @@
     background-color: #000;
     background-image:
         linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)),
-        url('https://images.unsplash.com/photo-1552346154-21d32810aba3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        var(--hero-bg, url('https://ayanxbiavxwouaexrywf.supabase.co/storage/v1/object/public/products/hero_1772684427270.png'));
     background-size: cover;
     background-position: center;
     display: flex;

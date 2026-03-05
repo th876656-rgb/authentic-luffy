@@ -83,10 +83,10 @@ const Hero = () => {
     };
 
     const backgroundImage = backgroundPreview || heroContent?.backgroundImage ||
-        'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80';
+        'https://ayanxbiavxwouaexrywf.supabase.co/storage/v1/object/public/products/hero_1772684427270.png';
 
     return (
-        <section className="hero-section" style={{ backgroundImage: `url(${backgroundImage})` }}>
+        <section className="hero-section" style={{ '--hero-bg': `url("${backgroundImage}")` }}>
             <div className="hero-overlay"></div>
             <div className="container hero-content">
                 {isAdmin && editMode && !isEditing && (
