@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Upload, Save, X, Image as ImageIcon, Layers } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import './EditableImage.css';
@@ -11,6 +11,103 @@ const PRESET_BACKGROUNDS = [
     { id: 'gradient', label: 'Holographic', url: '/bg_gradient.png' },
     { id: 'dark_glow', label: 'Cyberpunk Tối', url: '/bg_dark_glow.png' },
 ];
+
+/**
+ * Edge flood-fill background removal.
+ * Only removes pixels connected to the border of the image (the photographic background),
+ * preserving interior details like white swoosh, laces, and light-colored shoe areas.
+ */
+const removeBackgroundFloodFill = (data, width, height, threshold = 238) => {
+    const visited = new Uint8Array(width * height);
+    const queue = [];
+
+    const isLight = (idx) => {
+        const d = idx * 4;
+        return data[d] >= threshold && data[d + 1] >= threshold && data[d + 2] >= threshold;
+    };
+
+    const enqueue = (x, y) => {
+        const idx = y * width + x;
+        if (!visited[idx] && isLight(idx)) {
+            visited[idx] = 1;
+            queue.push(idx);
+        }
+    };
+
+    // Seed from all 4 edges
+    for (let x = 0; x < width; x++) {
+        enqueue(x, 0);
+        enqueue(x, height - 1);
+    }
+    for (let y = 0; y < height; y++) {
+        enqueue(0, y);
+        enqueue(width - 1, y);
+    }
+
+    // BFS flood fill
+    while (queue.length > 0) {
+        const idx = queue.pop();
+        // Make transparent
+        data[idx * 4 + 3] = 0;
+
+        const x = idx % width;
+        const y = Math.floor(idx / width);
+
+        if (x > 0) enqueue(x - 1, y);
+        if (x < width - 1) enqueue(x + 1, y);
+        if (y > 0) enqueue(x, y - 1);
+        if (y < height - 1) enqueue(x, y + 1);
+    }
+};
+
+const createComposite = (shoeSrc, bgSrc) => {
+    return new Promise((resolve) => {
+        const shoeImg = new Image();
+        shoeImg.crossOrigin = 'anonymous';
+
+        shoeImg.onload = () => {
+            const W = shoeImg.naturalWidth;
+            const H = shoeImg.naturalHeight;
+
+            // Decode shoe pixels
+            const tmp = document.createElement('canvas');
+            tmp.width = W; tmp.height = H;
+            const tctx = tmp.getContext('2d');
+            tctx.drawImage(shoeImg, 0, 0);
+
+            let imageData;
+            try {
+                imageData = tctx.getImageData(0, 0, W, H);
+            } catch (e) {
+                // CORS blocked – fall back to CSS only approach
+                resolve(null);
+                return;
+            }
+
+            // Remove border-connected background pixels
+            removeBackgroundFloodFill(imageData.data, W, H);
+            tctx.putImageData(imageData, 0, 0);
+
+            // Now composite on top of background
+            const bgImg = new Image();
+            bgImg.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = W; canvas.height = H;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(bgImg, 0, 0, W, H);       // background
+                ctx.drawImage(tmp, 0, 0);                 // shoe (transparent bg)
+                resolve(canvas.toDataURL('image/png'));
+            };
+            bgImg.onerror = () => {
+                resolve(null); // fallback to CSS
+            };
+            bgImg.src = bgSrc;
+        };
+
+        shoeImg.onerror = () => resolve(null);
+        shoeImg.src = shoeSrc;
+    });
+};
 
 const EditableImage = ({
     src,
@@ -28,8 +125,31 @@ const EditableImage = ({
     const [previewSrc, setPreviewSrc] = useState(null);
     const [selectedBg, setSelectedBg] = useState(productBackground || null);
     const [customBgPreview, setCustomBgPreview] = useState(null);
+    const [compositeSrc, setCompositeSrc] = useState(null);
+    const [isCompositing, setIsCompositing] = useState(false);
     const fileInputRef = useRef(null);
     const bgInputRef = useRef(null);
+
+    // When background or src changes, try to composite
+    useEffect(() => {
+        if (productBackground && src) {
+            setIsCompositing(true);
+            createComposite(src, productBackground).then((result) => {
+                setCompositeSrc(result);
+                setIsCompositing(false);
+            });
+        } else {
+            setCompositeSrc(null);
+        }
+    }, [productBackground, src]);
+
+    const activeBg = showBgPanel ? selectedBg : productBackground;
+    // If compositing succeeded, show it; else fall back to CSS background approach
+    const fallbackBgStyle = activeBg && !compositeSrc
+        ? { backgroundImage: `url(${activeBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {};
+
+    const displaySrc = previewSrc || (compositeSrc || src);
 
     const handleImageClick = () => {
         if (isAdmin && editMode && !isEditing && !showBgPanel) {
@@ -41,17 +161,13 @@ const EditableImage = ({
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewSrc(reader.result);
-            };
+            reader.onloadend = () => setPreviewSrc(reader.result);
             reader.readAsDataURL(file);
         }
     };
 
     const handleSave = async () => {
-        if (previewSrc) {
-            await onSave(previewSrc);
-        }
+        if (previewSrc) await onSave(previewSrc);
         setIsEditing(false);
         setPreviewSrc(null);
     };
@@ -59,9 +175,7 @@ const EditableImage = ({
     const handleCancel = () => {
         setIsEditing(false);
         setPreviewSrc(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const handleBgSelect = (bgUrl) => {
@@ -82,9 +196,7 @@ const EditableImage = ({
     };
 
     const handleSaveBg = async () => {
-        if (onSaveBackground) {
-            await onSaveBackground(selectedBg);
-        }
+        if (onSaveBackground) await onSaveBackground(selectedBg);
         setShowBgPanel(false);
     };
 
@@ -94,57 +206,31 @@ const EditableImage = ({
         setShowBgPanel(false);
     };
 
-    const displaySrc = previewSrc || src;
-    const activeBg = showBgPanel ? selectedBg : productBackground;
-
-    // Wrapper style: if background active, show it as CSS background-image
-    const wrapperBgStyle = activeBg
-        ? { backgroundImage: `url(${activeBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : {};
-
     if (!isAdmin || !editMode) {
         return (
-            <div
-                className={`editable-image-wrapper ${className}`}
-                style={{ position: 'relative', ...wrapperBgStyle, ...style }}
-            >
+            <div className={`editable-image-wrapper ${className}`} style={{ position: 'relative', ...fallbackBgStyle, ...style }}>
+                {isCompositing && <div className="compositing-overlay">⚙️ Đang xử lý...</div>}
                 <img
-                    src={src}
+                    src={displaySrc}
                     alt={alt}
                     className={`editable-image ${className}`}
-                    style={{
-                        position: 'relative',
-                        zIndex: 1,
-                        objectFit: 'contain',
-                        // If background is active, shrink the shoe slightly to reveal the bg at edges
-                        padding: activeBg ? '5%' : '0',
-                        background: 'transparent',
-                    }}
+                    style={{ position: 'relative', zIndex: 1 }}
                 />
             </div>
         );
     }
 
     return (
-        <div
-            className={`editable-image-wrapper ${isEditing || showBgPanel ? 'editing' : ''}`}
-            style={wrapperBgStyle}
-        >
+        <div className={`editable-image-wrapper ${isEditing || showBgPanel ? 'editing' : ''}`} style={fallbackBgStyle}>
+            {isCompositing && <div className="compositing-overlay">⚙️ Đang xử lý nền...</div>}
             <img
                 src={displaySrc}
                 alt={alt}
                 className={`editable-image ${className}`}
-                style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    objectFit: 'contain',
-                    padding: activeBg ? '5%' : '0',
-                    background: 'transparent',
-                }}
+                style={{ position: 'relative', zIndex: 1 }}
                 onClick={handleImageClick}
             />
 
-            {/* Normal edit overlay (when not in bg panel mode) */}
             {!isEditing && !showBgPanel && (
                 <div className="image-edit-overlay" onClick={handleImageClick}>
                     <ImageIcon size={32} />
@@ -152,7 +238,6 @@ const EditableImage = ({
                 </div>
             )}
 
-            {/* Admin action bar (shown when not in editing mode) */}
             {!isEditing && !showBgPanel && (
                 <button
                     className="btn-bg-switcher"
@@ -163,42 +248,24 @@ const EditableImage = ({
                 </button>
             )}
 
-            {/* Image upload panel */}
             {isEditing && (
                 <>
                     <label className="image-upload-zone">
                         <Upload size={32} />
                         <span>Choose new image</span>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileSelect}
-                            style={{ display: 'none' }}
-                        />
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
                     </label>
-
                     <div className="image-edit-actions">
-                        <button
-                            className="btn-save-image"
-                            onClick={handleSave}
-                            disabled={!previewSrc}
-                            title="Save image"
-                        >
+                        <button className="btn-save-image" onClick={handleSave} disabled={!previewSrc}>
                             <Save size={16} /> Save
                         </button>
-                        <button
-                            className="btn-cancel-image"
-                            onClick={handleCancel}
-                            title="Cancel"
-                        >
+                        <button className="btn-cancel-image" onClick={handleCancel}>
                             <X size={16} /> Cancel
                         </button>
                     </div>
                 </>
             )}
 
-            {/* Background selector panel */}
             {showBgPanel && (
                 <div className="bg-selector-panel" onClick={(e) => e.stopPropagation()}>
                     <div className="bg-panel-header">
@@ -211,32 +278,17 @@ const EditableImage = ({
                                 className={`bg-preset-item ${selectedBg === bg.url ? 'selected' : ''}`}
                                 onClick={() => handleBgSelect(bg.url)}
                             >
-                                {bg.url ? (
-                                    <img src={bg.url} alt={bg.label} />
-                                ) : (
-                                    <div className="bg-preset-none">✕</div>
-                                )}
+                                {bg.url ? <img src={bg.url} alt={bg.label} /> : <div className="bg-preset-none">✕</div>}
                                 <span>{bg.label}</span>
                             </div>
                         ))}
-
-                        {/* Custom upload option */}
                         <label className={`bg-preset-item bg-preset-custom ${customBgPreview ? 'selected' : ''}`}>
-                            {customBgPreview ? (
-                                <img src={customBgPreview} alt="Custom" />
-                            ) : (
-                                <div className="bg-preset-upload-icon">
-                                    <Upload size={24} />
-                                </div>
-                            )}
+                            {customBgPreview
+                                ? <img src={customBgPreview} alt="Custom" />
+                                : <div className="bg-preset-upload-icon"><Upload size={24} /></div>
+                            }
                             <span>Tải nền của bạn</span>
-                            <input
-                                ref={bgInputRef}
-                                type="file"
-                                accept="image/*"
-                                onChange={handleCustomBgUpload}
-                                style={{ display: 'none' }}
-                            />
+                            <input ref={bgInputRef} type="file" accept="image/*" onChange={handleCustomBgUpload} style={{ display: 'none' }} />
                         </label>
                     </div>
                     <div className="bg-panel-actions">
