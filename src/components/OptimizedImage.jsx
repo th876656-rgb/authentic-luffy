@@ -7,6 +7,7 @@ import './OptimizedImage.css';
  * - Fade in mượt khi ảnh tải xong
  * - Hỗ trợ lazy loading (chỉ tải khi xuất hiện trên màn hình)
  * - Fallback khi ảnh lỗi
+ * - Tránh layout shift (CLS) bằng width/height placeholder
  */
 const OptimizedImage = ({
     src,
@@ -49,6 +50,8 @@ const OptimizedImage = ({
                     ref={imgRef}
                     src={src || ''}
                     alt={alt}
+                    width="400"
+                    height="400"
                     loading={priority ? 'eager' : 'lazy'}
                     fetchpriority={priority ? 'high' : 'auto'}
                     decoding={priority ? 'sync' : 'async'}

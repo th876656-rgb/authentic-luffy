@@ -7,6 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Authentic Luffy</title>
 
+  <!-- Preconnect to Google Fonts FIRST (non-blocking font loading) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Load font non-blocking: media="print" trick then swap to all -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" media="print"
+    onload="this.media='all'" />
+  <!-- Fallback for browsers with JS disabled -->
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" />
+  </noscript>
+
   <!-- Preconnect to image hosts for faster loading -->
   <link rel="preconnect" href="https://ayanxbiavxwouaexrywf.supabase.co" crossorigin />
   <link rel="dns-prefetch" href="https://ayanxbiavxwouaexrywf.supabase.co" />
