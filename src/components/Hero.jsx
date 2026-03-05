@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProducts } from '../context/ProductContext';
 import { useNavigate } from 'react-router-dom';
 import { Edit2, Save, X, Upload } from 'lucide-react';
+import { supabase } from '../utils/supabase';
 import './Hero.css';
 
 const Hero = () => {
@@ -10,6 +11,8 @@ const Hero = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedContent, setEditedContent] = useState({});
     const [backgroundPreview, setBackgroundPreview] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (heroContent) {
@@ -20,10 +23,11 @@ const Hero = () => {
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setBackgroundPreview(reader.result);
-                setEditedContent({ ...editedContent, backgroundImage: reader.result });
+                // We keep the preview for UI, but don't set base64 to editedContent yet
             };
             reader.readAsDataURL(file);
         }
@@ -31,12 +35,43 @@ const Hero = () => {
 
     const handleSave = async () => {
         try {
-            await updateHeroContent(editedContent);
+            setIsSaving(true);
+            let finalImageUrl = editedContent.backgroundImage || heroContent?.backgroundImage;
+
+            if (selectedFile) {
+                // Upload to Supabase Storage
+                // Sử dụng bucket 'products' vì nó đã được cấu hình public
+                const fileExt = selectedFile.name.split('.').pop();
+                const fileName = `hero_${Date.now()}.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('products')
+                    .upload(fileName, selectedFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('products')
+                    .getPublicUrl(fileName);
+
+                finalImageUrl = publicUrl;
+            }
+
+            const finalContent = { ...editedContent, backgroundImage: finalImageUrl };
+            await updateHeroContent(finalContent);
+
             setIsEditing(false);
             setBackgroundPreview(null);
+            setSelectedFile(null);
+            alert('Đổi ảnh nền thành công!');
         } catch (error) {
             console.error('Failed to save hero content:', error);
-            alert('Không thể lưu thay đổi!');
+            alert('Không thể lưu thay đổi! Chi tiết lỗi: ' + (error.message || 'Lỗi không xác định'));
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -44,6 +79,7 @@ const Hero = () => {
         setEditedContent(heroContent);
         setIsEditing(false);
         setBackgroundPreview(null);
+        setSelectedFile(null);
     };
 
     const backgroundImage = backgroundPreview || heroContent?.backgroundImage ||
@@ -63,9 +99,9 @@ const Hero = () => {
                 {isEditing ? (
                     <div className="hero-editor">
                         <div className="editor-controls">
-                            <button className="btn-save-hero" onClick={handleSave}>
+                            <button className="btn-save-hero" onClick={handleSave} disabled={isSaving}>
                                 <Save size={18} />
-                                Lưu
+                                {isSaving ? 'Đang lưu...' : 'Lưu'}
                             </button>
                             <button className="btn-cancel-hero" onClick={handleCancel}>
                                 <X size={18} />
