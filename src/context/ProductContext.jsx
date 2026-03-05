@@ -12,14 +12,7 @@ export const useProducts = () => {
 };
 
 export const ProductProvider = ({ children }) => {
-    const [products, setProducts] = useState(() => {
-        try {
-            const cached = localStorage.getItem('products');
-            return cached ? JSON.parse(cached) : [];
-        } catch (e) {
-            return [];
-        }
-    });
+    const [products, setProducts] = useState([]);
 
     const [categories, setCategories] = useState(() => {
         try {
@@ -108,21 +101,16 @@ export const ProductProvider = ({ children }) => {
             setCategories(sanitizedCategories);
 
             try {
-                // Strip large base64 images from cache to avoid QuotaExceededError (5MB limit)
+                // Chỉ cache metadata (không cache images để tránh cache rỗng xảy ra)
                 const cacheableProducts = sanitizedProducts.map(p => {
-                    const lightweight = { ...p };
-                    if (lightweight.images) {
-                        lightweight.images = lightweight.images.map(img =>
-                            (img && img.length > 500) ? '' : img
-                        );
-                    }
-                    return lightweight;
+                    const { images, ...meta } = p;
+                    return { ...meta, images: [] }; // images sẽ được load từ Supabase
                 });
 
                 localStorage.setItem('products', JSON.stringify(cacheableProducts));
                 localStorage.setItem('categories', JSON.stringify(sanitizedCategories));
             } catch (storageError) {
-                console.warn('Failed to save to localStorage (quota exceeded perhaps?)', storageError);
+                console.warn('Failed to save to localStorage:', storageError);
             }
 
             setHeroContent(heroData);
