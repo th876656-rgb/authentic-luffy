@@ -12,8 +12,23 @@ export const useProducts = () => {
 };
 
 export const ProductProvider = ({ children }) => {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState(() => {
+        try {
+            const cached = localStorage.getItem('products');
+            return cached ? JSON.parse(cached) : [];
+        } catch (e) {
+            return [];
+        }
+    });
+
+    const [categories, setCategories] = useState(() => {
+        try {
+            const cached = localStorage.getItem('categories');
+            return cached ? JSON.parse(cached) : [];
+        } catch (e) {
+            return [];
+        }
+    });
     const [heroContent, setHeroContent] = useState(() => {
         try {
             const cached = localStorage.getItem('heroContent');
@@ -85,6 +100,13 @@ export const ProductProvider = ({ children }) => {
 
             setProducts(sanitizedProducts);
             setCategories(sanitizedCategories);
+
+            try {
+                localStorage.setItem('products', JSON.stringify(sanitizedProducts));
+                localStorage.setItem('categories', JSON.stringify(sanitizedCategories));
+            } catch (storageError) {
+                console.warn('Failed to save to localStorage (quota exceeded perhaps?)', storageError);
+            }
 
             setHeroContent(heroData);
             if (heroData) {
