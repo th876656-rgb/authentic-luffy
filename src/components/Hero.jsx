@@ -123,6 +123,27 @@ const Hero = () => {
                             />
                         </div>
 
+                        <div className="style-toggles">
+                            <label className="color-picker-label">
+                                Màu Hiệu Ứng:
+                                <input
+                                    type="color"
+                                    className="color-input"
+                                    value={editedContent.titleColor || '#ffffff'}
+                                    onChange={(e) => setEditedContent({ ...editedContent, titleColor: e.target.value })}
+                                />
+                            </label>
+
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={editedContent.isFuturistic || false}
+                                    onChange={(e) => setEditedContent({ ...editedContent, isFuturistic: e.target.checked })}
+                                />
+                                Chữ nổi 3D (Phát sáng)
+                            </label>
+                        </div>
+
                         <input
                             type="text"
                             className="edit-input badge-input"
@@ -166,7 +187,10 @@ const Hero = () => {
                 ) : (
                     <>
                         <div className="hero-badge">{heroContent?.badge || 'CẬP NHẬT HÀNG MỚI HÔM NAY'}</div>
-                        <h1 className="hero-title">
+                        <h1
+                            className={`hero-title ${heroContent?.isFuturistic ? 'futuristic' : ''}`}
+                            style={{ '--theme-color': heroContent?.titleColor || '#ffffff' }}
+                        >
                             <span className="text-stroke">{heroContent?.title1 || 'AUTHENTIC'}</span><br />
                             <span className="text-filled">{heroContent?.title2 || 'LUFFY'}</span>
                         </h1>

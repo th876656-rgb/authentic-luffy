@@ -233,3 +233,83 @@
     font-weight: 600;
     text-transform: uppercase;
 }
+
+/* Styling for futuristic 3D text */
+.hero-title.futuristic {
+    font-family: "Orbitron", "Inter", sans-serif;
+    letter-spacing: 2px;
+}
+
+.hero-title.futuristic .text-stroke {
+    -webkit-text-stroke: 1px var(--theme-color, #ffffff);
+    color: transparent;
+    text-shadow:
+        0 0 10px var(--theme-color, #ffffff),
+        0 0 20px var(--theme-color, #ffffff),
+        0 0 40px var(--theme-color, #ffffff);
+}
+
+.hero-title.futuristic .text-filled {
+    color: #ffffff;
+    text-shadow:
+        0 1px 0 #ccc,
+        0 2px 0 #c9c9c9,
+        0 3px 0 #bbb,
+        0 4px 0 #b9b9b9,
+        0 5px 0 #aaa,
+        0 6px 1px rgba(0, 0, 0, .1),
+        0 0 5px rgba(0, 0, 0, .1),
+        0 1px 3px rgba(0, 0, 0, .3),
+        0 3px 5px rgba(0, 0, 0, .2),
+        0 5px 10px rgba(0, 0, 0, .25),
+        0 10px 10px rgba(0, 0, 0, .2),
+        0 20px 20px rgba(0, 0, 0, .15),
+        0 0 20px var(--theme-color, #ffffff),
+        0 0 40px var(--theme-color, #ffffff);
+}
+
+/* Add custom class for style toggles */
+.style-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
+
+.color-picker-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-weight: 500;
+}
+
+.color-input {
+    width: 32px;
+    height: 32px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
