@@ -137,6 +137,10 @@ Thông tin sản phẩm:
         await updateProduct({ ...product, images: newImages });
     };
 
+    const handleSaveBackground = async (bgUrl) => {
+        await updateProduct({ ...product, productBackground: bgUrl });
+    };
+
     const handleSaveCategory = async (newValue) => {
         // Optimistic update
         setLocalCategory(newValue);
@@ -186,6 +190,8 @@ Thông tin sản phẩm:
                                 src={product.images?.[mainImageIndex] || ''}
                                 alt={product.name}
                                 onSave={(newSrc) => handleSaveImage(mainImageIndex, newSrc)}
+                                productBackground={product.productBackground || null}
+                                onSaveBackground={handleSaveBackground}
                             />
                             {product.quantity === 0 && (
                                 <div className="sold-overlay">
