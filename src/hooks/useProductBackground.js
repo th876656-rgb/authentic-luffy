@@ -68,7 +68,7 @@ export const createComposite = (shoeSrc, bgSrc) => {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(bgImg, 0, 0, W, H);
                 ctx.drawImage(tmp, 0, 0);
-                resolve(canvas.toDataURL('image/png'));
+                resolve(canvas.toDataURL('image/jpeg', 0.85));
             };
             bgImg.onerror = () => resolve(null);
             bgImg.src = bgSrc;
