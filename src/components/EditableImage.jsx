@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Save, X, Image as ImageIcon, Layers } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
+import { createComposite } from '../hooks/useProductBackground';
 import './EditableImage.css';
 
 // Preset futuristic backgrounds
@@ -12,103 +13,6 @@ const PRESET_BACKGROUNDS = [
     { id: 'dark_glow', label: 'Cyberpunk Tối', url: '/bg_dark_glow.png' },
 ];
 
-/**
- * Edge flood-fill background removal.
- * Only removes pixels connected to the border of the image (the photographic background),
- * preserving interior details like white swoosh, laces, and light-colored shoe areas.
- */
-const removeBackgroundFloodFill = (data, width, height, threshold = 238) => {
-    const visited = new Uint8Array(width * height);
-    const queue = [];
-
-    const isLight = (idx) => {
-        const d = idx * 4;
-        return data[d] >= threshold && data[d + 1] >= threshold && data[d + 2] >= threshold;
-    };
-
-    const enqueue = (x, y) => {
-        const idx = y * width + x;
-        if (!visited[idx] && isLight(idx)) {
-            visited[idx] = 1;
-            queue.push(idx);
-        }
-    };
-
-    // Seed from all 4 edges
-    for (let x = 0; x < width; x++) {
-        enqueue(x, 0);
-        enqueue(x, height - 1);
-    }
-    for (let y = 0; y < height; y++) {
-        enqueue(0, y);
-        enqueue(width - 1, y);
-    }
-
-    // BFS flood fill
-    while (queue.length > 0) {
-        const idx = queue.pop();
-        // Make transparent
-        data[idx * 4 + 3] = 0;
-
-        const x = idx % width;
-        const y = Math.floor(idx / width);
-
-        if (x > 0) enqueue(x - 1, y);
-        if (x < width - 1) enqueue(x + 1, y);
-        if (y > 0) enqueue(x, y - 1);
-        if (y < height - 1) enqueue(x, y + 1);
-    }
-};
-
-const createComposite = (shoeSrc, bgSrc) => {
-    return new Promise((resolve) => {
-        const shoeImg = new Image();
-        shoeImg.crossOrigin = 'anonymous';
-
-        shoeImg.onload = () => {
-            const W = shoeImg.naturalWidth;
-            const H = shoeImg.naturalHeight;
-
-            // Decode shoe pixels
-            const tmp = document.createElement('canvas');
-            tmp.width = W; tmp.height = H;
-            const tctx = tmp.getContext('2d');
-            tctx.drawImage(shoeImg, 0, 0);
-
-            let imageData;
-            try {
-                imageData = tctx.getImageData(0, 0, W, H);
-            } catch (e) {
-                // CORS blocked – fall back to CSS only approach
-                resolve(null);
-                return;
-            }
-
-            // Remove border-connected background pixels
-            removeBackgroundFloodFill(imageData.data, W, H);
-            tctx.putImageData(imageData, 0, 0);
-
-            // Now composite on top of background
-            const bgImg = new Image();
-            bgImg.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = W; canvas.height = H;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(bgImg, 0, 0, W, H);       // background
-                ctx.drawImage(tmp, 0, 0);                 // shoe (transparent bg)
-                resolve(canvas.toDataURL('image/png'));
-            };
-            bgImg.onerror = () => {
-                resolve(null); // fallback to CSS
-            };
-            bgImg.src = bgSrc;
-        };
-
-        shoeImg.onerror = () => resolve(null);
-        shoeImg.src = shoeSrc;
-    });
-};
-
 const EditableImage = ({
     src,
     alt = '',
@@ -118,6 +22,7 @@ const EditableImage = ({
     aspectRatio = 'auto',
     productBackground = null,
     onSaveBackground = null,
+    productId = null,
 }) => {
     const { isAdmin, editMode } = useProducts();
     const [isEditing, setIsEditing] = useState(false);
@@ -133,6 +38,13 @@ const EditableImage = ({
     // When background or src changes, try to composite
     useEffect(() => {
         if (productBackground && src) {
+            // Try cached composite first
+            if (productId) {
+                try {
+                    const cached = localStorage.getItem(`product_composite_${productId}`);
+                    if (cached) { setCompositeSrc(cached); return; }
+                } catch { }
+            }
             setIsCompositing(true);
             createComposite(src, productBackground).then((result) => {
                 setCompositeSrc(result);
@@ -141,10 +53,9 @@ const EditableImage = ({
         } else {
             setCompositeSrc(null);
         }
-    }, [productBackground, src]);
+    }, [productBackground, src, productId]);
 
     const activeBg = showBgPanel ? selectedBg : productBackground;
-    // If compositing succeeded, show it; else fall back to CSS background approach
     const fallbackBgStyle = activeBg && !compositeSrc
         ? { backgroundImage: `url(${activeBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : {};
@@ -196,7 +107,26 @@ const EditableImage = ({
     };
 
     const handleSaveBg = async () => {
-        if (onSaveBackground) await onSaveBackground(selectedBg);
+        if (onSaveBackground) {
+            await onSaveBackground(selectedBg);
+        }
+
+        // Precompute composite and cache for cards
+        if (productId && selectedBg && src) {
+            try { localStorage.removeItem(`product_composite_${productId}`); } catch { }
+            createComposite(src, selectedBg).then((result) => {
+                if (result) {
+                    try { localStorage.setItem(`product_composite_${productId}`, result); } catch { }
+                    setCompositeSrc(result);
+                }
+            });
+        } else if (productId && !selectedBg) {
+            try {
+                localStorage.removeItem(`product_composite_${productId}`);
+                setCompositeSrc(null);
+            } catch { }
+        }
+
         setShowBgPanel(false);
     };
 

@@ -206,6 +206,7 @@ Thông tin sản phẩm:
                                 onSave={(newSrc) => handleSaveImage(mainImageIndex, newSrc)}
                                 productBackground={productBg}
                                 onSaveBackground={handleSaveBackground}
+                                productId={product.id}
                             />
                             {product.quantity === 0 && (
                                 <div className="sold-overlay">
