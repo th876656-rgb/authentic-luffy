@@ -108,7 +108,18 @@ export const ProductProvider = ({ children }) => {
             setCategories(sanitizedCategories);
 
             try {
-                localStorage.setItem('products', JSON.stringify(sanitizedProducts));
+                // Strip large base64 images from cache to avoid QuotaExceededError (5MB limit)
+                const cacheableProducts = sanitizedProducts.map(p => {
+                    const lightweight = { ...p };
+                    if (lightweight.images) {
+                        lightweight.images = lightweight.images.map(img =>
+                            (img && img.length > 500) ? '' : img
+                        );
+                    }
+                    return lightweight;
+                });
+
+                localStorage.setItem('products', JSON.stringify(cacheableProducts));
                 localStorage.setItem('categories', JSON.stringify(sanitizedCategories));
             } catch (storageError) {
                 console.warn('Failed to save to localStorage (quota exceeded perhaps?)', storageError);
