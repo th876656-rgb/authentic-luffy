@@ -37,9 +37,14 @@ class Database {
     }
 
     async getAll(storeName) {
+        // For products: select only the fields the UI actually needs to reduce payload
+        const fields = storeName === 'products'
+            ? 'id,name,sku,price,sale_price,images,category,quantity,sizes,description,sizeInventory,created_at'
+            : '*';
+
         const { data, error } = await supabase
             .from(storeName)
-            .select('*')
+            .select(fields)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
