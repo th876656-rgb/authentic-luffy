@@ -100,7 +100,7 @@ const CategoryGrid = () => {
                                     priority={true}
                                 />
                                 {isAdmin && editMode && editingId === cat.id && (
-                                    <label className="image-upload-overlay" style={{ cursor: 'pointer', position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', color: 'white', zIndex: 10 }}>
+                                    <label className="image-upload-overlay" style={{ cursor: 'pointer', position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingBottom: '120px', background: 'rgba(0,0,0,0.5)', color: 'white', zIndex: 10 }}>
                                         <Upload size={32} />
                                         <span>Đổi Ảnh</span>
                                         <input
@@ -112,7 +112,7 @@ const CategoryGrid = () => {
                                     </label>
                                 )}
                             </div>
-                            <div className="card-overlay" style={{ zIndex: 5 }}>
+                            <div className="card-overlay" style={{ zIndex: 20 }}>
                                 {editingId === cat.id ? (
                                     <>
                                         <input
