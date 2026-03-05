@@ -25,6 +25,11 @@ const ProductDetail = () => {
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [productBg, setProductBg] = useState(() => {
+        try {
+            return localStorage.getItem(`product_bg_${productId}`) || null;
+        } catch (e) { return null; }
+    });
 
     // Show skeleton while loading unique product data
     if (loading && !product) {
@@ -137,8 +142,17 @@ Thông tin sản phẩm:
         await updateProduct({ ...product, images: newImages });
     };
 
-    const handleSaveBackground = async (bgUrl) => {
-        await updateProduct({ ...product, productBackground: bgUrl });
+    const handleSaveBackground = (bgUrl) => {
+        try {
+            if (bgUrl) {
+                localStorage.setItem(`product_bg_${productId}`, bgUrl);
+            } else {
+                localStorage.removeItem(`product_bg_${productId}`);
+            }
+            setProductBg(bgUrl);
+        } catch (e) {
+            console.error('Failed to save background:', e);
+        }
     };
 
     const handleSaveCategory = async (newValue) => {
@@ -190,7 +204,7 @@ Thông tin sản phẩm:
                                 src={product.images?.[mainImageIndex] || ''}
                                 alt={product.name}
                                 onSave={(newSrc) => handleSaveImage(mainImageIndex, newSrc)}
-                                productBackground={product.productBackground || null}
+                                productBackground={productBg}
                                 onSaveBackground={handleSaveBackground}
                             />
                             {product.quantity === 0 && (
