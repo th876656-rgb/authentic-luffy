@@ -106,9 +106,12 @@ const EditableImage = ({
         }
     };
 
-    const handleSaveBg = async () => {
+    const handleSaveBg = () => {
+        // Close panel IMMEDIATELY for instant UI feedback
+        setShowBgPanel(false);
+        // Fire Supabase sync in background (non-blocking)
         if (onSaveBackground) {
-            await onSaveBackground(selectedBg);
+            onSaveBackground(selectedBg).catch(console.error);
         }
 
         // Precompute composite and cache for cards

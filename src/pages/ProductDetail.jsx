@@ -144,39 +144,30 @@ Thông tin sản phẩm:
         await updateProduct({ ...product, images: newImages });
     };
 
-    const handleSaveBackground = async (bgUrl) => {
+    const handleSaveBackground = (bgUrl) => {
+        // === 1. Update UI immediately (synchronous, 0ms) ===
         try {
-            // Save background URL to localStorage for local preview
-            if (bgUrl) {
-                localStorage.setItem(`product_bg_${productId}`, bgUrl);
-            } else {
-                localStorage.removeItem(`product_bg_${productId}`);
-            }
+            if (bgUrl) localStorage.setItem(`product_bg_${productId}`, bgUrl);
+            else localStorage.removeItem(`product_bg_${productId}`);
             setProductBg(bgUrl);
+        } catch { }
 
+        // === 2. Sync to Supabase in background (non-blocking) ===
+        const syncToSupabase = async () => {
             const originalImg = product.images?.[0] || '';
-
             if (bgUrl && originalImg) {
-                // Save original image so we can restore it later
                 if (!localStorage.getItem(`product_orig_img_${productId}`)) {
                     localStorage.setItem(`product_orig_img_${productId}`, originalImg);
                 }
-
-                // Compute composite
                 const compositeDataUrl = await createComposite(originalImg, bgUrl);
-
                 if (compositeDataUrl) {
-                    // Upload composite to Supabase storage
                     const compositeUrl = await db.uploadProductComposite(productId, compositeDataUrl);
-                    // Update product.images[0] with the public composite URL
                     const newImages = [...(product.images || [])];
                     newImages[0] = compositeUrl;
                     await updateProduct({ ...product, images: newImages });
-                    // Cache locally too
                     try { localStorage.setItem(`product_composite_${productId}`, compositeDataUrl); } catch { }
                 }
             } else if (!bgUrl) {
-                // Restore original image[0]
                 const orig = localStorage.getItem(`product_orig_img_${productId}`);
                 if (orig) {
                     const newImages = [...(product.images || [])];
@@ -186,9 +177,11 @@ Thông tin sản phẩm:
                     localStorage.removeItem(`product_composite_${productId}`);
                 }
             }
-        } catch (e) {
-            console.error('Failed to save background:', e);
-        }
+        };
+        syncToSupabase().catch(console.error);
+
+        // Return a resolved promise so callers can use .catch()
+        return Promise.resolve();
     };
 
     const handleSaveCategory = async (newValue) => {
