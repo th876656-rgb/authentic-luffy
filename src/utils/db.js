@@ -137,6 +137,15 @@ class Database {
 
     // Hero operations
     async getHero() {
+        // Try to get dynamic content from settings table first
+        try {
+            const heroContent = await this.getSetting('hero_content');
+            if (heroContent) return heroContent;
+        } catch (e) {
+            console.warn('Failed to get hero from settings, checking legacy table');
+        }
+
+        // Fallback to legacy hero table if this is the first time running
         const { data, error } = await supabase
             .from('hero')
             .select('*')
@@ -144,18 +153,24 @@ class Database {
             .single();
 
         if (error && error.code !== 'PGRST116') throw error;
-        return data;
+
+        // Map legacy data to what Hero.jsx expects
+        if (data) {
+            return {
+                backgroundImage: data.image,
+                subtitle: data.subtitle,
+                buttonText: data.cta_text,
+                title1: data.title,
+                title2: '',
+                badge: ''
+            };
+        }
+        return null;
     }
 
     async updateHero(heroData) {
-        const { data, error } = await supabase
-            .from('hero')
-            .upsert({ ...heroData, id: 'main', updated_at: new Date().toISOString() })
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
+        // Save as JSON object in settings table to bypass rigid schema restrictions
+        return await this.updateSetting('hero_content', heroData);
     }
 
     // Initialize default data (not needed for Supabase - data is already in DB)

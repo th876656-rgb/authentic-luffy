@@ -177,7 +177,7 @@ export const ProductProvider = ({ children }) => {
     // Hero content operations
     const updateHeroContent = async (heroData) => {
         try {
-            await db.update('hero', { ...heroData, id: 'main' });
+            await db.updateHero(heroData);
             await loadData();
         } catch (error) {
             console.error('Failed to update hero content:', error);
