@@ -12,7 +12,14 @@ export const useProducts = () => {
 };
 
 export const ProductProvider = ({ children }) => {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState(() => {
+        try {
+            const cached = localStorage.getItem('products');
+            return cached ? JSON.parse(cached) : [];
+        } catch (e) {
+            return [];
+        }
+    });
 
     const [categories, setCategories] = useState(() => {
         try {
@@ -34,7 +41,12 @@ export const ProductProvider = ({ children }) => {
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoading] = useState(() => {
         try {
-            return !localStorage.getItem('products') || !localStorage.getItem('categories');
+            // Chỉ hiển thị loading ở thẻ lần đầu chưa có cache
+            const cachedProducts = localStorage.getItem('products');
+            const cachedCategories = localStorage.getItem('categories');
+            const hasProducts = cachedProducts && cachedProducts !== '[]';
+            const hasCategories = cachedCategories && cachedCategories !== '[]';
+            return !(hasProducts && hasCategories);
         } catch (e) {
             return true;
         }
@@ -68,21 +80,24 @@ export const ProductProvider = ({ children }) => {
         try {
             console.log('Loading data from Supabase...');
 
-            // Load data with individual error handling
-            const loadedProducts = await db.getAll('products').catch(err => {
-                console.warn('Products table empty or error:', err.message);
-                return [];
-            });
+            // Thêm timeout nhỏ để không block render lần đầu nếu đã có cache
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-            const loadedCategories = await db.getAll('categories').catch(err => {
-                console.warn('Categories table empty or error:', err.message);
-                return [];
-            });
-
-            const heroData = await db.getHero().catch(err => {
-                console.warn('Hero data not found:', err.message);
-                return null;
-            });
+            // Fetch song song để tối ưu thời gian chờ
+            const [loadedProducts, loadedCategories, heroData] = await Promise.all([
+                db.getAll('products').catch(err => {
+                    console.warn('Products table error:', err.message);
+                    return [];
+                }),
+                db.getAll('categories').catch(err => {
+                    console.warn('Categories table error:', err.message);
+                    return [];
+                }),
+                db.getHero().catch(err => {
+                    console.warn('Hero data error:', err.message);
+                    return null;
+                })
+            ]);
 
             console.log('Loaded products:', loadedProducts?.length || 0, 'items');
             console.log('Loaded categories:', loadedCategories?.length || 0, 'items');
@@ -101,13 +116,8 @@ export const ProductProvider = ({ children }) => {
             setCategories(sanitizedCategories);
 
             try {
-                // Chỉ cache metadata (không cache images để tránh cache rỗng xảy ra)
-                const cacheableProducts = sanitizedProducts.map(p => {
-                    const { images, ...meta } = p;
-                    return { ...meta, images: [] }; // images sẽ được load từ Supabase
-                });
-
-                localStorage.setItem('products', JSON.stringify(cacheableProducts));
+                // Cache cả array images để lần sau load Carousel có sẵn ảnh không chớp giật
+                localStorage.setItem('products', JSON.stringify(sanitizedProducts));
                 localStorage.setItem('categories', JSON.stringify(sanitizedCategories));
             } catch (storageError) {
                 console.warn('Failed to save to localStorage:', storageError);
@@ -223,15 +233,21 @@ export const ProductProvider = ({ children }) => {
     };
 
     // Admin operations
-    const login = (password) => {
-        // Simple password check - in production, use proper authentication
-        const correctPassword = localStorage.getItem('adminPassword') || 'admin123';
-        if (password === correctPassword) {
-            setIsAdmin(true);
-            localStorage.setItem('isAdmin', 'true');
-            return true;
+    const login = async (password) => {
+        try {
+            // Check password from database
+            const correctPassword = await db.getSetting('adminPassword') || 'admin123';
+            if (password === correctPassword) {
+                setIsAdmin(true);
+                localStorage.setItem('isAdmin', 'true');
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Lỗi kết nối máy chủ khi đăng nhập: ' + error.message);
+            return false;
         }
-        return false;
     };
 
     const logout = () => {
@@ -241,13 +257,20 @@ export const ProductProvider = ({ children }) => {
         localStorage.removeItem('editMode');
     };
 
-    const changePassword = (oldPassword, newPassword) => {
-        const currentPassword = localStorage.getItem('adminPassword') || 'admin123';
-        if (oldPassword === currentPassword) {
-            localStorage.setItem('adminPassword', newPassword);
-            return true;
+    const changePassword = async (oldPassword, newPassword) => {
+        try {
+            const currentPassword = await db.getSetting('adminPassword') || 'admin123';
+            if (oldPassword === currentPassword) {
+                await db.updateSetting('adminPassword', newPassword);
+                localStorage.setItem('adminPassword', newPassword); // For fast local login
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Change password error:', error);
+            alert('Lỗi cập nhật mật khẩu lên máy chủ. Vui lòng kiểm tra kết nối: ' + error.message);
+            return false;
         }
-        return false;
     };
 
     const toggleEditMode = () => {

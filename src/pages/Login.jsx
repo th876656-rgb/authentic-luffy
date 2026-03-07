@@ -8,9 +8,10 @@ const Login = () => {
     const navigate = useNavigate();
     const { login } = useProducts();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (login(password)) {
+        const success = await login(password);
+        if (success) {
             navigate('/admin');
         } else {
             alert('Mật khẩu không đúng!');

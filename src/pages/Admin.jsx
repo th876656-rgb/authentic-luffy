@@ -24,13 +24,14 @@ const Admin = () => {
         navigate('/');
     };
 
-    const handleChangePassword = (e) => {
+    const handleChangePassword = async (e) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
             alert('Mật khẩu mới không khớp!');
             return;
         }
-        if (changePassword(oldPassword, newPassword)) {
+        const success = await changePassword(oldPassword, newPassword);
+        if (success) {
             alert('Đổi mật khẩu thành công!');
             setShowPasswordModal(false);
             setOldPassword('');

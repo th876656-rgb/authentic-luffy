@@ -125,14 +125,42 @@ class Database {
     }
 
     async updateSetting(key, value) {
-        const { data, error } = await supabase
+        // Find existing record first to avoid upsert conflicts
+        const { data: existing } = await supabase
             .from('settings')
-            .upsert({ key, value, updated_at: new Date().toISOString() })
-            .select()
+            .select('id')
+            .eq('key', key)
             .single();
 
-        if (error) throw error;
-        return data;
+        let result, err;
+        const now = new Date().toISOString();
+
+        if (existing?.id) {
+            // Update
+            const res = await supabase
+                .from('settings')
+                .update({ value, updated_at: now })
+                .eq('id', existing.id)
+                .select()
+                .single();
+            result = res.data;
+            err = res.error;
+        } else {
+            // Insert
+            const res = await supabase
+                .from('settings')
+                .insert([{ key, value, updated_at: now }])
+                .select()
+                .single();
+            result = res.data;
+            err = res.error;
+        }
+
+        if (err) {
+            console.error('updateSetting error:', err);
+            throw err;
+        }
+        return result;
     }
 
     // Hero operations
