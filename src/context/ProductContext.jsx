@@ -236,7 +236,7 @@ export const ProductProvider = ({ children }) => {
     const login = async (password) => {
         try {
             // Check password from database
-            const correctPassword = await db.getSetting('adminPassword') || 'admin123';
+            const correctPassword = await db.getSetting('adminPassword') || 'Tranvandan2110';
             if (password === correctPassword) {
                 setIsAdmin(true);
                 localStorage.setItem('isAdmin', 'true');
@@ -259,7 +259,7 @@ export const ProductProvider = ({ children }) => {
 
     const changePassword = async (oldPassword, newPassword) => {
         try {
-            const currentPassword = await db.getSetting('adminPassword') || 'admin123';
+            const currentPassword = await db.getSetting('adminPassword') || 'Tranvandan2110';
             if (oldPassword === currentPassword) {
                 await db.updateSetting('adminPassword', newPassword);
                 localStorage.setItem('adminPassword', newPassword); // For fast local login
