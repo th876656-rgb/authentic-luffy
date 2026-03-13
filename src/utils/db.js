@@ -1,5 +1,27 @@
-// Supabase database wrapper
+// Supabase database wrapper with offline-resilient caching
 import { supabase } from './supabase.js';
+
+// In-memory cache để giảm các lần gọi Supabase lặp lại
+const memCache = {};
+const MEM_CACHE_TTL = 3 * 60 * 1000; // 3 phút
+
+function getMemCache(key) {
+    const entry = memCache[key];
+    if (!entry) return null;
+    if (Date.now() - entry.ts > MEM_CACHE_TTL) {
+        delete memCache[key];
+        return null;
+    }
+    return entry.data;
+}
+
+function setMemCache(key, data) {
+    memCache[key] = { data, ts: Date.now() };
+}
+
+function clearMemCache() {
+    Object.keys(memCache).forEach(k => delete memCache[k]);
+}
 
 class Database {
     constructor() {
@@ -7,10 +29,18 @@ class Database {
     }
 
     async init() {
-        // Test connection
-        const { error } = await supabase.from('products').select('count');
-        if (error) throw error;
-        return true;
+        // Test connection - nếu lỗi không throw, chỉ warn
+        try {
+            const { error } = await supabase.from('products').select('count', { count: 'exact', head: true });
+            if (error) {
+                console.warn('Supabase connection check failed:', error.message);
+                return false;
+            }
+            return true;
+        } catch (e) {
+            console.warn('Supabase init error:', e.message);
+            return false;
+        }
     }
 
     // Products operations
@@ -22,10 +52,15 @@ class Database {
             .single();
 
         if (error) throw error;
+        clearMemCache(); // Xóa cache khi có thay đổi
         return result;
     }
 
     async get(storeName, key) {
+        const cacheKey = `get_${storeName}_${key}`;
+        const cached = getMemCache(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from(storeName)
             .select('*')
@@ -33,17 +68,24 @@ class Database {
             .single();
 
         if (error) throw error;
+        setMemCache(cacheKey, data);
         return data;
     }
 
     async getAll(storeName) {
+        const cacheKey = `getAll_${storeName}`;
+        const cached = getMemCache(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from(storeName)
             .select('*')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data || [];
+        const result = data || [];
+        setMemCache(cacheKey, result);
+        return result;
     }
 
     async update(storeName, data) {
@@ -55,6 +97,7 @@ class Database {
             .single();
 
         if (error) throw error;
+        clearMemCache(); // Xóa cache khi có thay đổi
         return result;
     }
 
@@ -65,6 +108,7 @@ class Database {
             .eq('id', key);
 
         if (error) throw error;
+        clearMemCache();
         return true;
     }
 
@@ -72,9 +116,10 @@ class Database {
         const { error } = await supabase
             .from(storeName)
             .delete()
-            .neq('id', ''); // Delete all rows
+            .neq('id', '');
 
         if (error) throw error;
+        clearMemCache();
         return true;
     }
 
@@ -86,7 +131,7 @@ class Database {
             .eq('sku', sku)
             .single();
 
-        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
+        if (error && error.code !== 'PGRST116') throw error;
         return data;
     }
 
@@ -112,8 +157,12 @@ class Database {
         return data || [];
     }
 
-    // Settings operations
+    // Settings operations - với in-memory cache
     async getSetting(key) {
+        const cacheKey = `setting_${key}`;
+        const cached = getMemCache(cacheKey);
+        if (cached !== null) return cached;
+
         const { data, error } = await supabase
             .from('settings')
             .select('value')
@@ -121,11 +170,15 @@ class Database {
             .single();
 
         if (error && error.code !== 'PGRST116') throw error;
-        return data?.value;
+        const value = data?.value || null;
+        setMemCache(cacheKey, value);
+        return value;
     }
 
     async updateSetting(key, value) {
-        // Find existing record first to avoid upsert conflicts
+        // Xóa cache cho setting này
+        delete memCache[`setting_${key}`];
+
         const { data: existing } = await supabase
             .from('settings')
             .select('id')
@@ -136,7 +189,6 @@ class Database {
         const now = new Date().toISOString();
 
         if (existing?.id) {
-            // Update
             const res = await supabase
                 .from('settings')
                 .update({ value, updated_at: now })
@@ -146,7 +198,6 @@ class Database {
             result = res.data;
             err = res.error;
         } else {
-            // Insert
             const res = await supabase
                 .from('settings')
                 .insert([{ key, value, updated_at: now }])
@@ -165,7 +216,6 @@ class Database {
 
     // Hero operations
     async getHero() {
-        // Try to get dynamic content from settings table first
         try {
             const heroContent = await this.getSetting('hero_content');
             if (heroContent) return heroContent;
@@ -173,7 +223,6 @@ class Database {
             console.warn('Failed to get hero from settings, checking legacy table');
         }
 
-        // Fallback to legacy hero table if this is the first time running
         const { data, error } = await supabase
             .from('hero')
             .select('*')
@@ -182,7 +231,6 @@ class Database {
 
         if (error && error.code !== 'PGRST116') throw error;
 
-        // Map legacy data to what Hero.jsx expects
         if (data) {
             return {
                 backgroundImage: data.image,
@@ -197,18 +245,14 @@ class Database {
     }
 
     async updateHero(heroData) {
-        // Save as JSON object in settings table to bypass rigid schema restrictions
         return await this.updateSetting('hero_content', heroData);
     }
 
-    // Initialize default data (not needed for Supabase - data is already in DB)
     async initializeDefaultData() {
-        // Data is already initialized via SQL script
         console.log('Data already initialized in Supabase');
         return true;
     }
 
-    // Backup/Restore (not needed for Supabase - data is on server)
     async exportData() {
         const products = await this.getAll('products');
         const categories = await this.getAll('categories');
@@ -225,20 +269,14 @@ class Database {
 
     async restoreStore(storeName, dataArray) {
         if (!dataArray || !Array.isArray(dataArray)) return;
-
-        // Clear existing data
         await this.clearStore(storeName);
-
-        // Insert new data
         const { error } = await supabase
             .from(storeName)
             .insert(dataArray);
-
         if (error) throw error;
         return true;
     }
 }
 
-// Create and export singleton instance
 const db = new Database();
 export default db;
