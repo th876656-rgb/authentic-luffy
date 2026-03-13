@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
-import { ChevronRight, MessageCircle, Package, Trash2, Edit, Check } from 'lucide-react';
+import { ChevronRight, MessageCircle, Package, Trash2, Edit, Check, Camera, Plus } from 'lucide-react';
 import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import SizeInventoryEditor from '../components/SizeInventoryEditor';
 import { SkeletonProductDetail } from '../components/SkeletonComponents';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -25,6 +26,10 @@ const ProductDetail = () => {
     const [showInventoryEditor, setShowInventoryEditor] = useState(false);
     const [activeQuickEditId, setActiveQuickEditId] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [uploadingSlot, setUploadingSlot] = useState(null); // index đang upload
+    const imageInputRefs = useRef([]);
+
+    const MAX_IMAGES = 6;
 
     // Show skeleton while loading unique product data
     if (loading && !product) {
@@ -132,9 +137,28 @@ Thông tin sản phẩm:
     };
 
     const handleSaveImage = async (index, newImageSrc) => {
-        const newImages = [...product.images];
+        const newImages = [...(product.images || [])];
+        // Đảm bảo mảng đủ dài
+        while (newImages.length <= index) newImages.push('');
         newImages[index] = newImageSrc;
-        await updateProduct({ ...product, images: newImages });
+        await updateProduct({ ...product, images: newImages.filter((_, i) => i <= index || _) });
+    };
+
+    // Upload ảnh trực tiếp từ file input (cho ô thumbnail)
+    const handleDirectUpload = async (index, e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            setUploadingSlot(index);
+            const url = await uploadToCloudinary(file, 'authentic-luffy/products');
+            await handleSaveImage(index, url);
+            setMainImageIndex(index); // Chuyển sang ảnh vừa upload
+        } catch (err) {
+            alert('Upload ảnh thất bại: ' + err.message);
+        } finally {
+            setUploadingSlot(null);
+            if (e.target) e.target.value = '';
+        }
     };
 
 
@@ -220,20 +244,102 @@ Thông tin sản phẩm:
                                 </div>
                             )}
                         </div>
+                        {/* Thumbnail grid */}
                         <div className="thumbnail-grid">
-                            {(product.images || []).slice(0, 6).map((img, index) => (
-                                <div
-                                    key={index}
-                                    className={`thumbnail ${index === mainImageIndex ? 'active' : ''}`}
-                                    onClick={() => setMainImageIndex(index)}
-                                >
-                                    <EditableImage
-                                        src={img}
-                                        alt={`${product.name} ${index + 1}`}
-                                        onSave={(newSrc) => handleSaveImage(index, newSrc)}
-                                    />
-                                </div>
-                            ))}
+                            {isAdmin && editMode ? (
+                                // Admin mode: hiển thị đủ 6 ô ảnh
+                                Array.from({ length: MAX_IMAGES }).map((_, index) => {
+                                    const img = (product.images || [])[index];
+                                    const isUploading = uploadingSlot === index;
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={`thumbnail ${index === mainImageIndex ? 'active' : ''} ${!img ? 'empty-slot' : ''}`}
+                                            style={{ position: 'relative', cursor: 'pointer' }}
+                                        >
+                                            {img ? (
+                                                <>
+                                                    <img
+                                                        src={img}
+                                                        alt={`${product.name} ${index + 1}`}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        onClick={() => setMainImageIndex(index)}
+                                                    />
+                                                    {/* Nút đổi ảnh rõ ràng */}
+                                                    <label
+                                                        style={{
+                                                            position: 'absolute', inset: 0,
+                                                            background: 'rgba(0,0,0,0.5)',
+                                                            display: 'flex', flexDirection: 'column',
+                                                            alignItems: 'center', justifyContent: 'center',
+                                                            color: 'white', fontSize: '11px', cursor: 'pointer',
+                                                            opacity: 0, transition: 'opacity 0.2s',
+                                                            borderRadius: '4px'
+                                                        }}
+                                                        className="img-edit-hover"
+                                                        title="Đổi ảnh"
+                                                    >
+                                                        <Camera size={18} />
+                                                        <span>Đổi ảnh</span>
+                                                        <input
+                                                            type="file" accept="image/*"
+                                                            style={{ display: 'none' }}
+                                                            onChange={(e) => handleDirectUpload(index, e)}
+                                                        />
+                                                    </label>
+                                                    {isUploading && (
+                                                        <div style={{
+                                                            position: 'absolute', inset: 0,
+                                                            background: 'rgba(0,0,0,0.7)',
+                                                            display: 'flex', alignItems: 'center',
+                                                            justifyContent: 'center', color: 'white', fontSize: '11px',
+                                                            borderRadius: '4px'
+                                                        }}>
+                                                            ⏳ Đang tải...
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                // Ô trống - thêm ảnh mới
+                                                <label style={{
+                                                    display: 'flex', flexDirection: 'column',
+                                                    alignItems: 'center', justifyContent: 'center',
+                                                    width: '100%', height: '100%',
+                                                    border: '2px dashed #555', borderRadius: '4px',
+                                                    color: '#888', cursor: 'pointer', fontSize: '11px',
+                                                    gap: '4px', background: '#1a1a1a'
+                                                }}>
+                                                    {isUploading ? (
+                                                        <span style={{ color: '#aaa' }}>⏳ Đang tải...</span>
+                                                    ) : (
+                                                        <>
+                                                            <Plus size={20} color="#666" />
+                                                            <span>Ảnh {index + 1}</span>
+                                                        </>
+                                                    )}
+                                                    <input
+                                                        type="file" accept="image/*"
+                                                        style={{ display: 'none' }}
+                                                        onChange={(e) => handleDirectUpload(index, e)}
+                                                    />
+                                                </label>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                // Normal mode: hiển thị ảnh hiện có
+                                (product.images || []).slice(0, 6).map((img, index) => (
+                                    <div
+                                        key={index}
+                                        className={`thumbnail ${index === mainImageIndex ? 'active' : ''}`}
+                                        onClick={() => setMainImageIndex(index)}
+                                    >
+                                        <img src={img} alt={`${product.name} ${index + 1}`}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
 

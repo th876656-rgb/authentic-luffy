@@ -516,3 +516,18 @@
     color: #3b82f6;
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
+
+/* === Image upload slots (admin mode) === */
+.thumbnail:hover .img-edit-hover,
+.thumbnail .img-edit-hover:focus-within {
+    opacity: 1 !important;
+}
+
+.thumbnail.empty-slot {
+    background: #111;
+    border: 2px dashed #444;
+}
+
+.thumbnail.empty-slot:hover {
+    border-color: #3b82f6;
+}
