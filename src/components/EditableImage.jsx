@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Save, X, Image as ImageIcon } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
-import { uploadToCloudinary } from '../utils/cloudinary';
+import { supabase } from '../utils/supabase';
 import './EditableImage.css';
 
 const EditableImage = ({
@@ -36,15 +36,9 @@ const EditableImage = ({
         if (previewSrc) {
             try {
                 setIsUploading(true);
-                // Upload lên Cloudinary, lấy URL thay vì lưu base64
-                const cloudinaryUrl = await uploadToCloudinary(
-                    previewSrc,
-                    'authentic-luffy/hero'
-                );
-                await onSave(cloudinaryUrl);
+                await onSave(previewSrc);
             } catch (err) {
-                console.error('Cloudinary upload failed, saving base64 as fallback:', err);
-                await onSave(previewSrc); // fallback nếu lỗi
+                console.error('Save failed:', err);
             } finally {
                 setIsUploading(false);
             }
@@ -106,7 +100,7 @@ const EditableImage = ({
                     </label>
                     <div className="image-edit-actions">
                         <button className="btn-save-image" onClick={handleSave} disabled={!previewSrc || isUploading}>
-                            <Save size={16} /> {isUploading ? 'Đang tải...' : 'Save'}
+                            <Save size={16} /> {isUploading ? 'Đang lưu...' : 'Save'}
                         </button>
                         <button className="btn-cancel-image" onClick={handleCancel}>
                             <X size={16} /> Cancel

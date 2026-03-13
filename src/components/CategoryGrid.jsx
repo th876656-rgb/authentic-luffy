@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import { Edit, Upload, Save, X } from 'lucide-react';
-import { uploadToCloudinary } from '../utils/cloudinary';
+import { supabase } from '../utils/supabase';
 import OptimizedImage from './OptimizedImage';
 import './CategoryGrid.css';
 
@@ -37,12 +37,21 @@ const CategoryGrid = () => {
                 setIsSaving(true);
                 let finalImageUrl = editData.image;
 
-                // Nếu có file mới được chọn (preview đang là base64)
                 if (selectedFile) {
-                    finalImageUrl = await uploadToCloudinary(
-                        selectedFile,
-                        'authentic-luffy/categories'
-                    );
+                    const fileExt = selectedFile.name.split('.').pop();
+                    const fileName = `category_${editingId}_${Date.now()}.${fileExt}`;
+
+                    const { error: uploadError } = await supabase.storage
+                        .from('products')
+                        .upload(fileName, selectedFile, { cacheControl: '3600', upsert: false });
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('products')
+                        .getPublicUrl(fileName);
+
+                    finalImageUrl = publicUrl;
                 }
 
                 await updateCategory(editingId, { ...editData, image: finalImageUrl });

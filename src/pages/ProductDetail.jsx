@@ -6,7 +6,7 @@ import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import SizeInventoryEditor from '../components/SizeInventoryEditor';
 import { SkeletonProductDetail } from '../components/SkeletonComponents';
-import { uploadToCloudinary } from '../utils/cloudinary';
+import { supabase } from '../utils/supabase';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -144,15 +144,27 @@ Thông tin sản phẩm:
         await updateProduct({ ...product, images: newImages.filter((_, i) => i <= index || _) });
     };
 
-    // Upload ảnh trực tiếp từ file input (cho ô thumbnail)
+    // Upload ảnh trực tiếp từ file input (cho ô thumbnail) lên Supabase Storage
     const handleDirectUpload = async (index, e) => {
         const file = e.target.files[0];
         if (!file) return;
         try {
             setUploadingSlot(index);
-            const url = await uploadToCloudinary(file, 'authentic-luffy/products');
-            await handleSaveImage(index, url);
-            setMainImageIndex(index); // Chuyển sang ảnh vừa upload
+            const fileExt = file.name.split('.').pop();
+            const fileName = `product_${Date.now()}_${index}.${fileExt}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('products')
+                .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('products')
+                .getPublicUrl(fileName);
+
+            await handleSaveImage(index, publicUrl);
+            setMainImageIndex(index);
         } catch (err) {
             alert('Upload ảnh thất bại: ' + err.message);
         } finally {
