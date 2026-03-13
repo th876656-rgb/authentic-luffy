@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProducts } from '../context/ProductContext';
 import { Upload, X } from 'lucide-react';
-import { supabase } from '../utils/supabase';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import './AddProductForm.css';
 
 const AddProductForm = ({ categoryId, onClose }) => {
@@ -59,55 +59,16 @@ const AddProductForm = ({ categoryId, onClose }) => {
         setFormData({ ...formData, sizeInventory: newInventory });
     };
 
-    // Helper: Chuyển Base64 thành File object để upload
-    const base64ToFile = (base64String, filename) => {
-        const arr = base64String.split(',');
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, { type: mime });
-    };
-
-    // Helper: Upload ảnh lên Supabase Storage
-    const uploadImageToSupabase = async (base64Image, index) => {
-        // Nếu là link ảnh có sẵn (không phải base64), giữ nguyên
+    // Helper: Upload ảnh lên Cloudinary
+    const uploadImage = async (base64Image) => {
+        if (!base64Image) return '';
+        // Nếu đã là URL công khai (không phải base64), giữ nguyên
         if (!base64Image.startsWith('data:')) return base64Image;
-
         try {
-            // Determine extension from MIME type
-            const mime = base64Image.split(';')[0].split(':')[1];
-            let extension = 'jpg';
-            if (mime === 'image/png') extension = 'png';
-            if (mime === 'image/webp') extension = 'webp';
-            if (mime === 'image/gif') extension = 'gif';
-            if (mime === 'image/heic') extension = 'heic';
-
-            const fileName = `${Date.now()}_${index}.${extension}`;
-            const file = base64ToFile(base64Image, fileName);
-
-            const { data, error } = await supabase.storage
-                .from('products')
-                .upload(fileName, file, {
-                    cacheControl: '3600',
-                    upsert: false
-                });
-
-            if (error) throw error;
-
-            // Lấy public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('products')
-                .getPublicUrl(fileName);
-
-            return publicUrl;
+            return await uploadToCloudinary(base64Image, 'authentic-luffy/products');
         } catch (error) {
-            console.error('Upload failed, using base64 fallback:', error);
-            // Nếu lỗi upload, dùng tạm ảnh base64 cũ để không lỗi luồng
-            return base64Image;
+            console.error('Cloudinary upload failed:', error);
+            return base64Image; // fallback: giữ base64 nếu lỗi
         }
     };
 
@@ -140,12 +101,11 @@ const AddProductForm = ({ categoryId, onClose }) => {
 
             // Prepare product data - Let Supabase generate ID
 
-            // --- XỬ LÝ UPLOAD ẢNH (MỚI) ---
-            // Duyệt qua các ảnh, nếu là Base64 thì upload lấy link
+            // Upload ảnh lên Cloudinary
             const processedImages = await Promise.all(
-                formData.images.map(async (img, idx) => {
+                formData.images.map(async (img) => {
                     if (!img) return '';
-                    return await uploadImageToSupabase(img, idx);
+                    return await uploadImage(img);
                 })
             );
 

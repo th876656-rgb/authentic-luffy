@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Save, X, Image as ImageIcon } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import './EditableImage.css';
 
 const EditableImage = ({
@@ -30,8 +31,25 @@ const EditableImage = ({
         }
     };
 
+    const [isUploading, setIsUploading] = useState(false);
+
     const handleSave = async () => {
-        if (previewSrc) await onSave(previewSrc);
+        if (previewSrc) {
+            try {
+                setIsUploading(true);
+                // Upload lên Cloudinary, lấy URL thay vì lưu base64
+                const cloudinaryUrl = await uploadToCloudinary(
+                    previewSrc,
+                    'authentic-luffy/hero'
+                );
+                await onSave(cloudinaryUrl);
+            } catch (err) {
+                console.error('Cloudinary upload failed, saving base64 as fallback:', err);
+                await onSave(previewSrc); // fallback nếu lỗi
+            } finally {
+                setIsUploading(false);
+            }
+        }
         setIsEditing(false);
         setPreviewSrc(null);
     };
@@ -88,8 +106,8 @@ const EditableImage = ({
                         />
                     </label>
                     <div className="image-edit-actions">
-                        <button className="btn-save-image" onClick={handleSave} disabled={!previewSrc}>
-                            <Save size={16} /> Save
+                        <button className="btn-save-image" onClick={handleSave} disabled={!previewSrc || isUploading}>
+                            <Save size={16} /> {isUploading ? 'Đang tải...' : 'Save'}
                         </button>
                         <button className="btn-cancel-image" onClick={handleCancel}>
                             <X size={16} /> Cancel
