@@ -14,6 +14,7 @@ const EditableImage = ({
     const { isAdmin, editMode } = useProducts();
     const [isEditing, setIsEditing] = useState(false);
     const [previewSrc, setPreviewSrc] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleImageClick = () => {
@@ -30,8 +31,6 @@ const EditableImage = ({
             reader.readAsDataURL(file);
         }
     };
-
-    const [isUploading, setIsUploading] = useState(false);
 
     const handleSave = async () => {
         if (previewSrc) {

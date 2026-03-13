@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProducts } from '../context/ProductContext';
 import { useNavigate } from 'react-router-dom';
 import { Edit2, Save, X, Upload } from 'lucide-react';
-import { supabase } from '../utils/supabase';
+import { uploadToCloudinary } from '../utils/cloudinary';
 import './Hero.css';
 
 const Hero = () => {
@@ -39,25 +39,11 @@ const Hero = () => {
             let finalImageUrl = editedContent.backgroundImage || heroContent?.backgroundImage;
 
             if (selectedFile) {
-                // Upload to Supabase Storage
-                // Sử dụng bucket 'products' vì nó đã được cấu hình public
-                const fileExt = selectedFile.name.split('.').pop();
-                const fileName = `hero_${Date.now()}.${fileExt}`;
-
-                const { error: uploadError } = await supabase.storage
-                    .from('products')
-                    .upload(fileName, selectedFile, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
-
-                if (uploadError) throw uploadError;
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(fileName);
-
-                finalImageUrl = publicUrl;
+                // Upload lên Cloudinary thay vì Supabase Storage
+                finalImageUrl = await uploadToCloudinary(
+                    selectedFile,
+                    'authentic-luffy/hero'
+                );
             }
 
             const finalContent = { ...editedContent, backgroundImage: finalImageUrl };
@@ -112,7 +98,7 @@ const Hero = () => {
                         <div className="image-upload-section">
                             <label htmlFor="hero-bg-upload" className="upload-label">
                                 <Upload size={20} />
-                                Đổi Ảnh Nền
+                                {selectedFile ? 'Đổi ảnh khác' : 'Đổi Ảnh Nền'}
                             </label>
                             <input
                                 id="hero-bg-upload"
@@ -121,6 +107,17 @@ const Hero = () => {
                                 onChange={handleImageUpload}
                                 style={{ display: 'none' }}
                             />
+                            {/* Hiển thị thumbnail sau khi chọn ảnh */}
+                            {backgroundPreview && (
+                                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <img
+                                        src={backgroundPreview}
+                                        alt="Preview"
+                                        style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '4px', border: '2px solid #ff4444' }}
+                                    />
+                                    <span style={{ color: '#aaa', fontSize: '12px' }}>Ảnh đã chọn ✔</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="style-toggles">
