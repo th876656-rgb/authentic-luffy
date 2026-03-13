@@ -155,6 +155,8 @@ const Navbar = () => {
                         <Link to="/category/daily" className="nav-link">Giày Thời Trang</Link>
                         <span className="separator">|</span>
                         <Link to="/category/sports" className="nav-link">Giày Thể Thao</Link>
+                        <span className="separator">|</span>
+                        <Link to="/category/special" className="nav-link">Hàng Đặt Riêng</Link>
                     </div>
                 </div>
 
@@ -225,6 +227,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/category/sports" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
                     Giày Thể Thao
+                </Link>
+                <Link to="/category/special" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                    Hàng Đặt Riêng
                 </Link>
                 <div className="mobile-store-info">
                     <div>Hotline: 0868.653.931</div>

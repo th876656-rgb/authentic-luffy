@@ -20,6 +20,7 @@
 
 /* Skeleton Card */
 .skeleton-card {
+    min-width: 250px;
     border-radius: 12px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.05);
@@ -83,5 +84,11 @@
 @media (max-width: 968px) {
     .skeleton-detail-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .skeleton-card {
+        min-width: 160px;
     }
 }

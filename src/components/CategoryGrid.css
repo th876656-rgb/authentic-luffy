@@ -25,22 +25,25 @@
 
 .category-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
 }
 
 .category-card {
     position: relative;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 12px;
     aspect-ratio: 4/5;
     cursor: pointer;
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .category-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .card-image {
@@ -53,12 +56,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .category-card:hover .card-image img,
 .category-card:hover .card-image .opt-img {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 .card-overlay {
@@ -66,10 +69,10 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: var(--spacing-lg);
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 30px 20px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%);
     color: white;
-    transition: all 0.3s ease;
+    transition: all 0.4s ease;
 }
 
 .category-card.edit-mode {
@@ -184,30 +187,37 @@
 }
 
 .card-overlay h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 4px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 6px;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
 }
 
 .card-overlay p {
-    color: #ccc;
-    font-size: 0.9rem;
-    margin-bottom: var(--spacing-md);
+    color: #e5e5e5;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
 .btn-link {
     background: none;
     color: white;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0;
-    border-bottom: 1px solid transparent;
-    transition: border 0.3s;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
 }
 
 .category-card:hover .btn-link {
     border-bottom-color: white;
+    transform: translateX(5px);
 }
 
 @media (max-width: 768px) {

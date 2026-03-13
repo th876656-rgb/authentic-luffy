@@ -251,6 +251,9 @@ Thông tin sản phẩm:
                                             <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'sports')} className={product.category === 'sports' ? 'active' : ''}>
                                                 Giày thể thao {product.category === 'sports' && <Check size={14} />}
                                             </button>
+                                            <button onClick={(e) => handleQuickCategoryUpdate(e, product.id, 'special')} className={product.category === 'special' ? 'active' : ''}>
+                                                Hàng đặt riêng {product.category === 'special' && <Check size={14} />}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -505,12 +508,14 @@ Thông tin sản phẩm:
                                         <option value="new">Hàng mới về</option>
                                         <option value="daily">Giày thời trang</option>
                                         <option value="sports">Giày thể thao</option>
+                                        <option value="special">Hàng đặt riêng</option>
                                     </select>
                                 ) : (
                                     <span>
                                         {product.category === 'new' ? 'Hàng mới về' :
                                             product.category === 'daily' ? 'Giày thời trang' :
-                                                product.category === 'sports' ? 'Giày thể thao' : product.category}
+                                                product.category === 'sports' ? 'Giày thể thao' :
+                                                    product.category === 'special' ? 'Hàng đặt riêng' : product.category}
                                     </span>
                                 )}
                             </div>
