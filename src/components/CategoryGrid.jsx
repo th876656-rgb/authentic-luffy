@@ -6,8 +6,22 @@ import { supabase } from '../utils/supabase';
 import OptimizedImage from './OptimizedImage';
 import './CategoryGrid.css';
 
+// Skeleton placeholder cho category card
+const SkeletonCategoryCard = () => (
+    <div className="category-card skeleton-category-card">
+        <div className="card-image">
+            <div className="skeleton-shimmer" />
+        </div>
+        <div className="card-overlay">
+            <div className="skeleton-text-line" style={{ width: '60%', height: '20px', marginBottom: '8px' }} />
+            <div className="skeleton-text-line" style={{ width: '80%', height: '14px', marginBottom: '12px' }} />
+            <div className="skeleton-text-line" style={{ width: '40%', height: '14px' }} />
+        </div>
+    </div>
+);
+
 const CategoryGrid = () => {
-    const { categories, isAdmin, editMode, updateCategory } = useProducts();
+    const { categories, isAdmin, editMode, updateCategory, loading } = useProducts();
     const navigate = useNavigate();
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({});
@@ -84,7 +98,9 @@ const CategoryGrid = () => {
             <div className="container">
                 <h2 className="section-title">DANH MỤC NỔI BẬT</h2>
                 <div className="category-grid">
-                    {categories.map((cat) => (
+                    {(loading && categories.length === 0) ? (
+                        Array(4).fill(0).map((_, i) => <SkeletonCategoryCard key={i} />)
+                    ) : categories.map((cat) => (
                         <div
                             key={cat.id}
                             className={`category-card ${editMode ? 'edit-mode' : ''}`}

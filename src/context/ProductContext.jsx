@@ -11,8 +11,8 @@ export const useProducts = () => {
     return context;
 };
 
-// Cache TTL: 5 phút để giảm calls Supabase
-const CACHE_TTL = 5 * 60 * 1000;
+// Cache TTL: 30 phút để giảm calls Supabase và hiện nội dung ngay
+const CACHE_TTL = 30 * 60 * 1000;
 
 function getCachedData(key) {
     try {
